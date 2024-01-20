@@ -116,7 +116,7 @@ def search(
     debug: bool = Option(help="Enable debug", default=None),
 ) -> None:
     """
-    Search documents
+    Search documents and generate LLM response
     """
 
     from . import elastic, llm
@@ -147,7 +147,7 @@ def generate(
     debug: bool = Option(help="Enable debug", default=None),
 ) -> None:
     """
-    Generate LLM Model
+    Query LLM without search context
     """
 
     from . import llm
@@ -166,7 +166,7 @@ def embeddings(
     debug: bool = Option(help="Enable debug", default=None),
 ):
     """
-    Generate embeddings
+    Generate LLM embeddings
     """
 
     from . import llm
