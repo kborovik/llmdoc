@@ -1,0 +1,129 @@
+# Run the following commands prior to starting Elastic+Kibana docker-compose:
+# > docker volume create elastic && docker volume create kibana && docker volume create certs
+# > docker container run --name=elastic-init --user=root --tty --interactive --rm --volume=certs:/usr/share/elasticsearch/config/certs docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.12.0} /bin/bash -c "elasticsearch-certutil ca --pem --pass=elastic-1 --out config/certs/ca.zip && unzip -j config/certs/ca.zip -d config/certs && elasticsearch-certutil cert --pem --ip=127.0.0.1 --dns='elastic-1,localhost' --ca-cert=config/certs/ca.crt --ca-key=config/certs/ca.key --ca-pass=elastic-1 --pass=elastic-1 --out config/certs/instance.zip && unzip -j config/certs/instance.zip -d config/certs && rm config/certs/*.zip && openssl rsa -passin pass:elastic-1 -in config/certs/ca.key -out config/certs/ca.key && openssl rsa -passin pass:elastic-1 -in config/certs/instance.key -out config/certs/instance.key && chown -R 1000 config/certs"
+
+services:
+
+  elastic:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.12.0}
+    container_name: elastic-1
+    hostname: elastic-1
+    ports:
+      - 9200:9200
+      - 9300:9300
+    environment:
+      - node.name=elastic-1
+      - cluster.name=elastic
+      - discovery.type=single-node
+      - bootstrap.memory_lock=true
+      - xpack.security.enabled=true
+      - xpack.security.http.ssl.enabled=true
+      - xpack.security.http.ssl.key=/usr/share/elasticsearch/config/certs/instance.key
+      - xpack.security.http.ssl.certificate=/usr/share/elasticsearch/config/certs/instance.crt
+      - xpack.security.http.ssl.certificate_authorities=/usr/share/elasticsearch/config/certs/ca.crt
+      - xpack.security.http.ssl.verification_mode=certificate
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:?err}
+      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+    healthcheck:
+      test: curl --user elastic:${ELASTIC_PASSWORD} --cacert /usr/share/elasticsearch/config/certs/ca.crt https://127.0.0.1:9200/_cat/health
+      interval: 10s
+      timeout: 2s
+      retries: 6
+    volumes:
+      - type: volume
+        source: elastic
+        target: /usr/share/elasticsearch/data
+      - type: volume
+        source: certs
+        target: /usr/share/elasticsearch/config/certs
+        read_only: true
+
+  setup:
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.12.0}
+    container_name: setup-1
+    hostname: setup-1
+    environment:
+      - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:?err}
+    command: >
+      bash -c 'until curl -s -X POST --user elastic:${ELASTIC_PASSWORD} --cacert config/certs/ca.crt -H "Content-Type: application/json" https://elastic-1:9200/_security/user/kibana_system/_password -d "{\"password\":\"${ELASTIC_PASSWORD}\"}" | grep -q "^{}"; do sleep 3; done;'
+    volumes:
+      - type: volume
+        source: elastic
+        target: /usr/share/elasticsearch/data
+      - type: volume
+        source: certs
+        target: /usr/share/elasticsearch/config/certs
+        read_only: true
+    depends_on:
+      elastic:
+        condition: service_healthy
+
+  kibana:
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_VERSION:-8.12.0}
+    container_name: kibana-1
+    hostname: kibana-1
+    ports:
+      - 5601:5601
+    environment:
+      - SERVER_NAME=kibana-1
+      - ELASTICSEARCH_HOSTS=https://elastic-1:9200
+      - ELASTICSEARCH_USERNAME=kibana_system
+      - ELASTICSEARCH_PASSWORD=${ELASTIC_PASSWORD:?err}
+      - ELASTICSEARCH_SSL_CERTIFICATEAUTHORITIES=/usr/share/kibana/config/certs/ca.crt
+      - ELASTICSEARCH_SSL_VERIFICATIONMODE=certificate
+      - STATUS_ALLOWANONYMOUS=true
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      elastic:
+        condition: service_healthy
+    healthcheck:
+      test: curl http://127.0.0.1:5601/api/status
+      interval: 10s
+      timeout: 2s
+      retries: 6
+    volumes:
+      - type: volume
+        source: kibana
+        target: /usr/share/kibana/data
+      - type: volume
+        source: certs
+        target: /usr/share/kibana/config/certs
+        read_only: true
+
+  ollama:
+    image: ollama/ollama:0.1.20
+    container_name: ollama-1
+    hostname: ollama-1
+    ports:
+      - 11434:11434
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities:
+                - "gpu"
+    volumes:
+      - type: volume
+        source: ollama
+        target: /root/.ollama
+
+networks:
+  default:
+    name: llmdoc
+
+volumes:
+  certs:
+    name: certs
+    external: true
+  elastic:
+    name: elastic
+    external: true
+  kibana:
+    name: kibana
+    external: true
+  ollama:
+    name: ollama
+    external: true

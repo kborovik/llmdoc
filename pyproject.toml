@@ -1,0 +1,19 @@
+[tool.poetry]
+authors = ["Konstantin Borovik <kb@lab5.ca>"]
+description = ""
+name = "llmdoc"
+readme = "README.md"
+version = "0.1.0"
+
+[tool.poetry.dependencies]
+elasticsearch = "~8.12.0"
+en-core-web-sm = {url = "https://github.com/explosion/spacy-models/releases/download/en_core_web_sm-3.7.1/en_core_web_sm-3.7.1-py3-none-any.whl"}
+pydantic-settings = "~2.1.0"
+python = "~3.11"
+
+[tool.poetry.scripts]
+llmdoc = "llmdoc.cli:app"
+
+[build-system]
+build-backend = "poetry.core.masonry.api"
+requires = ["poetry-core"]

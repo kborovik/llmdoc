@@ -1,0 +1,5 @@
+.elastic-init
+.env
+**/__pycache__
+certs/
+dist/

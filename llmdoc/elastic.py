@@ -1,0 +1,117 @@
+import json
+import logging
+from typing import List
+
+from elasticsearch.exceptions import BadRequestError
+
+from . import CFG, ES, ElasticDoc, ElasticHits, TextChunk, llm
+
+elastic_mappings = {
+    "properties": {
+        "name": {
+            "type": "text",
+        },
+        "text": {
+            "type": "text",
+        },
+        "lemma": {
+            "type": "text",
+        },
+        "embed": {
+            "type": "dense_vector",
+            "dims": CFG.embed_dims,
+            "index": "true",
+            "similarity": "cosine",
+        },
+    }
+}
+
+
+def init() -> None:
+    """
+    Initialize Elastic Storage (Index)
+    """
+    try:
+        ES.indices.create(index=CFG.elastic_index_name, mappings=elastic_mappings)
+    except BadRequestError as error:
+        if error.error == "resource_already_exists_exception":
+            logging.info("Index already exists")
+        else:
+            logging.info(error.body)
+            raise
+
+
+def index(chunks: List[TextChunk], doc_id: str) -> None:
+    """
+    Elastic Index NLP Document
+    """
+    if not chunks:
+        return
+
+    if not doc_id:
+        raise ValueError("doc_id is required")
+
+    for i, chunk in enumerate(chunks):
+        elastic_doc = ElasticDoc(
+            name=f"{doc_id}-{i}",
+            text=chunk.text,
+            lemma=chunk.lemma,
+            embed=llm.embeddings(text=chunk.lemma),
+        )
+
+        response = ES.index(
+            id=f"{doc_id}-{i}",
+            index=CFG.elastic_index_name,
+            document=elastic_doc.model_dump(),
+        )
+
+        logging.info(json.dumps(response.body))
+
+
+def search(query: str) -> list[ElasticHits]:
+    """
+    Elastic BM25 + KNN search
+    """
+
+    bm25 = {
+        "match": {
+            "text": {
+                "query": query,
+                "boost": 0.5,
+            },
+        },
+    }
+
+    knn = {
+        "field": "embed",
+        "query_vector": llm.embeddings(query),
+        "k": CFG.search_size * 2,
+        "num_candidates": 10000,
+        "boost": 0.5,
+    }
+
+    logging.info("Send query to ElasticSearch")
+    logging.debug(f"Query: {bm25['match']['text']['query']}")
+
+    reply = ES.search(
+        index=CFG.elastic_index_name,
+        fields=["text"],
+        size=CFG.search_size,
+        query=bm25,
+        knn=knn,
+    )
+
+    hits = reply["hits"]["hits"]
+    docs = []
+
+    for hit in hits:
+        if hit["_score"] > CFG.search_score:
+            docs.append(
+                ElasticHits(
+                    id=hit["_id"],
+                    score=hit["_score"],
+                    text=hit["_source"]["text"],
+                )
+            )
+
+    return docs
