@@ -12,31 +12,23 @@
       "args": [
         "index",
         "--file",
-        "tests/test-text.md"
+        "tests/test-text.txt"
       ],
       "justMyCode": true
     },
     {
-      "name": "query",
+      "name": "search",
       "type": "python",
       "request": "launch",
       "module": "llmdoc",
       "args": [
         "search",
         "--query",
-        "Who is Eros?"
-      ],
-      "justMyCode": true
-    },
-    {
-      "name": "question",
-      "type": "python",
-      "request": "launch",
-      "module": "llmdoc",
-      "args": [
-        "question",
-        "--ask",
-        "In Greek mythology, who is Eros?"
+        "what protestors demanded?",
+        "--elastic-index-name",
+        "llmdoc-test",
+        "--search-score",
+        "0.7",
       ],
       "justMyCode": true
     },

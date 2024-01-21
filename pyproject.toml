@@ -1,9 +1,9 @@
 [tool.poetry]
 authors = ["Konstantin Borovik <kb@lab5.ca>"]
-description = "This project applies a Large Language Model (LLM) to summarize search results from ElasticSearch document queries."
+description = "Document Analysis and Summarization with Large Language Model (LLM)"
 name = "llmdoc"
 readme = "README.md"
-version = "0.1.5"
+version = "0.1.6"
 
 [tool.poetry.dependencies]
 elasticsearch = "~8.12.0"
