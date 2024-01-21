@@ -11,7 +11,11 @@ default: settings
 app_name := llmdoc
 
 ELASTIC_VERSION := 8.12.0
-ELASTIC_PASSWORD ?= $(shell pass llmdoc/password/elastic)
+ELASTIC_PASSWORD ?= $(shell grep -i ELASTIC_PASSWORD .env | cut -d "=" -f 2)
+
+ifeq ($(ELASTIC_PASSWORD),)
+ELASTIC_PASSWORD := MyBigPass45
+endif
 
 LOGLEVEL ?= INFO
 

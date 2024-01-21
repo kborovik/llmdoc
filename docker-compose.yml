@@ -1,7 +1,3 @@
-# Run the following commands prior to starting Elastic+Kibana docker-compose:
-# > docker volume create elastic && docker volume create kibana && docker volume create certs
-# > docker container run --name=elastic-init --user=root --tty --interactive --rm --volume=certs:/usr/share/elasticsearch/config/certs docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION:-8.12.0} /bin/bash -c "elasticsearch-certutil ca --pem --pass=elastic-1 --out config/certs/ca.zip && unzip -j config/certs/ca.zip -d config/certs && elasticsearch-certutil cert --pem --ip=127.0.0.1 --dns='elastic-1,localhost' --ca-cert=config/certs/ca.crt --ca-key=config/certs/ca.key --ca-pass=elastic-1 --pass=elastic-1 --out config/certs/instance.zip && unzip -j config/certs/instance.zip -d config/certs && rm config/certs/*.zip && openssl rsa -passin pass:elastic-1 -in config/certs/ca.key -out config/certs/ca.key && openssl rsa -passin pass:elastic-1 -in config/certs/instance.key -out config/certs/instance.key && chown -R 1000 config/certs"
-
 services:
 
   elastic:

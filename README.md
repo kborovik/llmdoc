@@ -45,7 +45,7 @@ sudo apt install nvidia-docker2
 ```shell
 git clone https://github.com/kborovik/llmdoc.git
 cd llmdoc
-export ELASTIC_PASSWORD=MyBigPass45
+echo "ELASTIC_PASSWORD=MyBigPass45" >> .env
 make init
 make start
 make test
@@ -60,8 +60,7 @@ export ELASTIC_PASSWORD=MyBigPass45
 ```
 
 ```shell
-cat .env
-ELASTIC_PASSWORD=MyBigPass45
+echo "ELASTIC_PASSWORD=MyBigPass45" >> .env
 ```
 
 The full list of supported configuration settings can be found in the `llmdoc/config.py` file.
