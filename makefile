@@ -58,7 +58,7 @@ rebuild:
 	$(call header,Delete Elastic Index)
 	poetry run llmdoc storage --delete
 	$(call header,Add Document to Elastic)
-	poetry run llmdoc index --file tests/the-odyssey-by-homer.txt
+	poetry run llmdoc index --file tests/happy-prince-by-oscar-wilde.txt
 
 build: init
 	poetry build
@@ -136,10 +136,11 @@ test: ollama-model
 	set -e
 	$(call header,Test document index and search)
 	export elastic_index_name=llmdoc-test
+	export search_score=0.7
 	poetry run llmdoc storage --delete
-	poetry run llmdoc index --file tests/test-text.txt
+	poetry run llmdoc index --file tests/test-text.txt --debug
 	sleep 2
-	poetry run llmdoc search --query "Does Polybus have a son?" --debug
+	poetry run llmdoc search --query "what protestors demanded?" --debug
 
 ###############################################################################
 # Functions

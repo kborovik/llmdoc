@@ -71,42 +71,40 @@ def index(
     """
     Index document
     """
-
     from . import elastic, nlp
 
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
     if not file.is_file():
-        logging.error(f"{file} is not a file")
+        logging.error(f"INDEX -  {file} is not a file")
         raise Exit(1)
 
-    logging.info(f"Read file {file}")
+    logging.info(f"INDEX -  Read file {file}")
     text = file.read_text(encoding="utf-8")
 
     doc_id = file.name
 
-    logging.info(f"NLP - analyze {doc_id}")
+    logging.info(f"INDEX - Analyzing {doc_id}")
     nlp_doc = nlp.analyze(text=text)
 
-    logging.info(f"NLP - Split {doc_id} into chunks")
+    logging.info(f"INDEX - Splitting {doc_id} into chunks")
     chunks = nlp.chunk(
         doc=nlp_doc,
         chunk_size=CFG.chunk_words,
     )
-    logging.info(f"NLP - Generated {len(chunks)} chunks")
+    logging.info(f"INDEX - Generated {len(chunks)} chunks")
 
     logging.debug(
-        f"NLP - First Chunk\n==> Text <==\n{repr(chunks[0].text)}\n==> Lemma <==\n{repr(chunks[0].lemma)}\n"
+        f"INDEX - First Chunk\n==> Text <==\n{repr(chunks[0].text)}\n==> Lemma <==\n{repr(chunks[0].lemma)}\n"
     )
     logging.debug(
-        f"NLP - Last Chunk\n==> Text <==\n{repr(chunks[-1].text)}\n==> Lemma <==\n{repr(chunks[-1].lemma)}\n"
+        f"INDEX - Last Chunk\n==> Text <==\n{repr(chunks[-1].text)}\n==> Lemma <==\n{repr(chunks[-1].lemma)}\n"
     )
 
-    logging.info("Create Index")
+    logging.info(f"INDEX - Indexing file: {doc_id}")
+
     elastic.init()
-
-    logging.info(f"ElasticSearch - Index file {doc_id}")
     elastic.index(chunks=chunks, doc_id=doc_id)
 
 
@@ -114,21 +112,39 @@ def index(
 def search(
     query: str = Option(help="Search query"),
     debug: bool = Option(help="Enable debug", default=None),
+    search_score: float = Option(
+        help=f"Search score filter (current settings: {CFG.search_score})", default=None
+    ),
+    elastic_index_name: str = Option(
+        help=f"Elastic Index Name (current settings: {CFG.elastic_index_name})",
+        default=None,
+    ),
 ) -> None:
     """
     Search documents and generate LLM response
     """
-
     from . import elastic, llm
 
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
+    if search_score:
+        CFG.search_score = search_score
+
+    if elastic_index_name:
+        CFG.elastic_index_name = elastic_index_name
+
     reply = elastic.search(query=query)
+
+    if len(reply) == 0:
+        logging.info(
+            f"SEARCH - No results found, decrease `search-score` below {CFG.search_score}"
+        )
+        raise Exit(0)
 
     context = ""
     for doc in reply:
-        logging.debug(f"\nID: {doc.id}\nScore: {doc.score}\n{doc.text}\n")
+        logging.info(f"\nID: {doc.id}\nScore: {doc.score}\n{doc.text}\n")
         context += f"document-id {doc.id}\n{doc.text}\n\n"
 
     prompt = f"""
@@ -143,7 +159,7 @@ def search(
 
 @app.command(no_args_is_help=True)
 def generate(
-    ask: str = Option(help="LLM Prompt"),
+    text: str = Option(help="LLM Prompt"),
     debug: bool = Option(help="Enable debug", default=None),
 ) -> None:
     """
@@ -155,7 +171,7 @@ def generate(
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
 
-    reply = llm.generate(prompt=ask)
+    reply = llm.generate(prompt=text)
 
     print(reply)
 

@@ -1,3 +1,4 @@
+import logging
 import re
 
 import spacy
@@ -37,8 +38,9 @@ def chunk(
     Returns:
         list[TextChunk]: A list of TextChunk objects representing a group of sentences approximately chunk_size words in total.
     """
-    size = len(doc)
     chunks = []
+    size = len(doc)
+    logging.debug(f"NLP - Words in document {size}")
 
     for start in range(0, size, chunk_size):
         end = min(start + chunk_size, size)

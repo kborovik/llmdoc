@@ -22,8 +22,8 @@ def generate(prompt: str) -> str:
         "stream": False,
     }
 
-    logging.info("Send query to Large Language Model")
-    logging.debug(f"LLM Model: {CFG.ollama_model}")
+    logging.info("LLM - Send query to Large Language Model")
+    logging.debug(f"LLM - model: {CFG.ollama_model}")
 
     reply = session.post(url=ollama_generate_url, json=ollama_generate_data)
 
@@ -36,7 +36,7 @@ def generate(prompt: str) -> str:
     generated_tokens = json_data.get("eval_count", 0)
 
     logging.info(
-        f"Total time: {total_duration:.2f}s, Context tokens: {context_tokens}, Generated tokens: {generated_tokens}"
+        f"LLM - Total time: {total_duration:.2f}s, Context tokens: {context_tokens}, Generated tokens: {generated_tokens}"
     )
 
     return json_data["response"]
@@ -56,8 +56,8 @@ def embeddings(text: str) -> list[float]:
         "model": CFG.ollama_model,
     }
 
-    logging.info("Generate embeddings")
-    logging.debug(f"Embedding text: {repr(text)}")
+    logging.info("LLM - Generating embeddings")
+    logging.debug(f"LLM - Embeddings text: {repr(text)}")
 
     reply = session.post(url=ollama_embeddings_url, json=ollama_embeddings_data)
 

@@ -35,7 +35,7 @@ def init() -> None:
         ES.indices.create(index=CFG.elastic_index_name, mappings=elastic_mappings)
     except BadRequestError as error:
         if error.error == "resource_already_exists_exception":
-            logging.info("Index already exists")
+            logging.info("Elastic - Index already exists")
         else:
             logging.info(error.body)
             raise
@@ -65,7 +65,7 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
             document=elastic_doc.model_dump(),
         )
 
-        logging.info(json.dumps(response.body))
+        logging.info(f"Elastic - {json.dumps(response.body)}")
 
 
 def search(query: str) -> list[ElasticHits]:
@@ -90,8 +90,8 @@ def search(query: str) -> list[ElasticHits]:
         "boost": 0.5,
     }
 
-    logging.info("Send query to ElasticSearch")
-    logging.debug(f"Query: {bm25['match']['text']['query']}")
+    logging.info("Elastic - Sending query")
+    logging.debug(f"Elastic - Query: {bm25['match']['text']['query']}")
 
     reply = ES.search(
         index=CFG.elastic_index_name,
