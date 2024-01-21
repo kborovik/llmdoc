@@ -7,7 +7,7 @@ class Config(BaseSettings):
 
     chunk_words: int = 300
     search_size: int = 5
-    search_score: float = 1.0
+    search_score: float = 3.0
 
     elastic_ca_certs: str = "certs/ca.crt"
     elastic_host: str = "localhost"

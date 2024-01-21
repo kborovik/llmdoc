@@ -8,7 +8,7 @@ from .schema import ElasticDoc, ElasticHits, TextChunk
 
 logging.basicConfig(
     level=getenv("LOGLEVEL", default=logging.INFO),
-    format="[%(relativeCreated)5dms %(levelname)s] (%(module)s.%(funcName)s) - %(message)s",
+    format="[%(relativeCreated)5dms %(levelname)s] (%(module)s.%(funcName)s) %(message)s",
 )
 
 
