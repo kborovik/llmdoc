@@ -1,6 +1,19 @@
-# Document Search Results Summarization with Large Language Model (LLM)
+# Document Analysis and Summarization with Large Language Model (LLM)
 
 This project applies a Large Language Model (LLM) to summarize search results from ElasticSearch document queries.
+
+## Document Analysis and Summarization
+
+The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze text. It performs various tasks such as sentence splitting, generating sentence lemmas, grouping sentences and lemmas into chunks, generating embeddings using a Large Language Model, and storing the generated document in an ElasticSearch index.
+
+### Workflow
+
+1. Text analysis with spaCy library
+2. Sentence splitting
+3. Lemmatization of sentences
+4. Chunking of sentences and lemmas
+5. Generation of embeddings using a Large Language Model
+6. Storage of the generated document in an ElasticSearch index
 
 # Demo
 
