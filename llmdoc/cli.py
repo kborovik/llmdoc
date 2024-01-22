@@ -115,6 +115,10 @@ def search(
     search_score: float = Option(
         help=f"Search score filter (current settings: {CFG.search_score})", default=None
     ),
+    search_size: int = Option(
+        help=f"Number of search hits (current settings: {CFG.search_size},)",
+        default=None,
+    ),
     elastic_index_name: str = Option(
         help=f"Elastic Index Name (current settings: {CFG.elastic_index_name})",
         default=None,
@@ -130,6 +134,9 @@ def search(
 
     if search_score:
         CFG.search_score = search_score
+
+    if search_size:
+        CFG.search_size = search_size
 
     if elastic_index_name:
         CFG.elastic_index_name = elastic_index_name

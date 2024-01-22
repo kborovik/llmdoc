@@ -6,8 +6,8 @@ class Config(BaseSettings):
     """Application configuration"""
 
     chunk_words: int = 300
-    search_size: int = 5
-    search_score: float = 3.0
+    search_size: int = 3
+    search_score: float = 2.0
 
     elastic_ca_certs: str = "certs/ca.crt"
     elastic_host: str = "localhost"

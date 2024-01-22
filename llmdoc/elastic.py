@@ -77,7 +77,7 @@ def search(query: str) -> list[ElasticHits]:
         "match": {
             "text": {
                 "query": query,
-                "boost": 0.5,
+                "boost": 1.0,
             },
         },
     }
@@ -87,7 +87,7 @@ def search(query: str) -> list[ElasticHits]:
         "query_vector": llm.embeddings(query),
         "k": CFG.search_size * 2,
         "num_candidates": 10000,
-        "boost": 0.5,
+        "boost": 1.0,
     }
 
     logging.info("Elastic - Sending query")
