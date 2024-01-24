@@ -66,6 +66,10 @@ def storage(
 @app.command(no_args_is_help=True)
 def index(
     file: Path = Option(help="File", resolve_path=True),
+    elastic_index_name: str = Option(
+        help=f"Elastic Index Name (current settings: {CFG.elastic_index_name})",
+        default=None,
+    ),
     debug: bool = Option(help="Enable debug", default=None),
 ) -> None:
     """
@@ -75,6 +79,9 @@ def index(
 
     if debug:
         logging.getLogger().setLevel(logging.DEBUG)
+
+    if elastic_index_name:
+        CFG.elastic_index_name = elastic_index_name
 
     if not file.is_file():
         logging.error(f"INDEX -  {file} is not a file")

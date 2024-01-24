@@ -9,6 +9,7 @@ default: settings
 # Targets
 ###############################################################################
 app_name := llmdoc
+VERSION := $(shell awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 
 ELASTIC_VERSION := 8.12.0
 ELASTIC_PASSWORD ?= $(shell grep -i ELASTIC_PASSWORD .env | cut -d "=" -f 2)
@@ -33,6 +34,7 @@ ${ca_crt}:
 ###############################################################################
 settings:
 	echo "#######################################################################"
+	echo "# VERSION=${VERSION}"
 	echo "# LOGLEVEL=${LOGLEVEL}"
 	echo "# ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
 	echo "#######################################################################"
@@ -49,9 +51,11 @@ upgrade:
 
 patch:
 	poetry version patch
+	git add --all
 
 minor:
 	poetry version minor
+	git add --all
 
 rebuild:
 	set -e
@@ -64,9 +68,7 @@ build: init
 	poetry build
 
 commit: patch
-	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
-	git add --all
-	git commit --message="revision $${version}"
+	git commit --message="v${VERSION}"
 	git push
 
 clean: stop
@@ -135,12 +137,17 @@ ollama-model:
 test: ollama-model
 	set -e
 	$(call header,Test document index and search)
-	export elastic_index_name=llmdoc-test
-	export search_score=0.7
 	poetry run llmdoc storage --delete
-	poetry run llmdoc index --file tests/test-text.txt --debug
+	poetry run llmdoc index --file tests/alice-wonderland.txt
 	sleep 2
-	poetry run llmdoc search --query "what protestors demanded?" --debug
+	poetry run llmdoc search --query "Who is Mouse?"
+
+debug:
+	$(call header,Debug)
+	poetry run llmdoc storage --delete
+	poetry run llmdoc index --file tests/alice-wonderland.txt --debug
+	sleep 2
+	poetry run llmdoc search --query "Who is Mouse?" --debug
 
 ###############################################################################
 # Functions

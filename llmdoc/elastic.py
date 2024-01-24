@@ -90,7 +90,7 @@ def search(query: str) -> list[ElasticHits]:
         "boost": 1.0,
     }
 
-    logging.info("Elastic - Sending query")
+    logging.info(f"Elastic - Query: {query}")
     logging.debug(f"Elastic - Query: {bm25['match']['text']['query']}")
 
     reply = ES.search(
