@@ -2,7 +2,7 @@ import logging
 
 import requests
 
-from . import CFG
+from . import cfg
 
 session = requests.Session()
 
@@ -14,16 +14,18 @@ def generate(prompt: str) -> str:
     if not prompt:
         raise ValueError("Prompt cannot be empty or null.")
 
-    ollama_generate_url = f"http://{CFG.ollama_host}:{CFG.ollama_port}/api/generate"
+    ollama_generate_url = (
+        f"http://{cfg.ollama_host}:{cfg.ollama_port}/api/generate"
+    )
 
     ollama_generate_data = {
         "prompt": prompt,
-        "model": CFG.ollama_model,
+        "model": cfg.ollama_model,
         "stream": False,
     }
 
     logging.info("LLM - Send query to Large Language Model")
-    logging.debug(f"LLM - model: {CFG.ollama_model}")
+    logging.debug(f"LLM - model: {cfg.ollama_model}")
 
     reply = session.post(url=ollama_generate_url, json=ollama_generate_data)
 
@@ -49,11 +51,13 @@ def embeddings(text: str) -> list[float]:
     if not text:
         raise ValueError("Text cannot be empty or null.")
 
-    ollama_embeddings_url = f"http://{CFG.ollama_host}:{CFG.ollama_port}/api/embeddings"
+    ollama_embeddings_url = (
+        f"http://{cfg.ollama_host}:{cfg.ollama_port}/api/embeddings"
+    )
 
     ollama_embeddings_data = {
         "prompt": text,
-        "model": CFG.ollama_model,
+        "model": cfg.ollama_model,
     }
 
     logging.info("LLM - Generating embeddings")

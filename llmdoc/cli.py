@@ -4,27 +4,29 @@ from pathlib import Path
 
 from typer import Exit, Option, Typer
 
-from . import CFG, ES
+from . import cfg, es
 
-app = Typer(name="llmdocs", no_args_is_help=True, pretty_exceptions_show_locals=False)
+cli = Typer(
+    name="llmdocs", no_args_is_help=True, pretty_exceptions_show_locals=False
+)
 
 
-@app.callback()
+@cli.callback()
 def callback():
     """
     Document Query with Large Language Model (LLM)
     """
 
 
-@app.command()
+@cli.command()
 def config():
     """
     Show config
     """
-    print(CFG.model_dump_json())
+    print(cfg.model_dump_json())
 
 
-@app.command(no_args_is_help=True)
+@cli.command(no_args_is_help=True)
 def storage(
     create: bool = Option(help="Create index", default=None),
     delete: bool = Option(help="Delete index", default=None),
@@ -44,18 +46,18 @@ def storage(
 
     if delete:
         try:
-            response = ES.indices.delete(index=CFG.elastic_index_name)
+            response = es.indices.delete(index=cfg.elastic_index_name)
         except NotFoundError:
             logging.info("Elastic Index not found")
     elif stats:
         try:
-            response = ES.indices.stats(index=CFG.elastic_index_name)
+            response = es.indices.stats(index=cfg.elastic_index_name)
             print(json.dumps(response.body["indices"]))
         except NotFoundError:
             logging.info("Elastic Index not found")
     elif show:
         try:
-            response = ES.indices.get(index=CFG.elastic_index_name)
+            response = es.indices.get(index=cfg.elastic_index_name)
             print(json.dumps(response.body))
         except NotFoundError:
             logging.info("Elastic Index not found")
@@ -63,11 +65,11 @@ def storage(
         elastic.init()
 
 
-@app.command(no_args_is_help=True)
+@cli.command(no_args_is_help=True)
 def index(
     file: Path = Option(help="File", resolve_path=True),
     elastic_index_name: str = Option(
-        help=f"Elastic Index Name (current settings: {CFG.elastic_index_name})",
+        help=f"Elastic Index Name (current settings: {cfg.elastic_index_name})",
         default=None,
     ),
     debug: bool = Option(help="Enable debug", default=None),
@@ -81,7 +83,7 @@ def index(
         logging.getLogger().setLevel(logging.DEBUG)
 
     if elastic_index_name:
-        CFG.elastic_index_name = elastic_index_name
+        cfg.elastic_index_name = elastic_index_name
 
     if not file.is_file():
         logging.error(f"INDEX -  {file} is not a file")
@@ -98,7 +100,7 @@ def index(
     logging.info(f"INDEX - Splitting {doc_id} into chunks")
     chunks = nlp.chunk(
         doc=nlp_doc,
-        chunk_size=CFG.chunk_words,
+        chunk_size=cfg.chunk_words,
     )
     logging.info(f"INDEX - Generated {len(chunks)} chunks")
 
@@ -115,19 +117,20 @@ def index(
     elastic.index(chunks=chunks, doc_id=doc_id)
 
 
-@app.command(no_args_is_help=True)
+@cli.command(no_args_is_help=True)
 def search(
     query: str = Option(help="Search query"),
     debug: bool = Option(help="Enable debug", default=None),
     search_score: float = Option(
-        help=f"Search score filter (current settings: {CFG.search_score})", default=None
+        help=f"Search score filter (current settings: {cfg.search_score})",
+        default=None,
     ),
     search_size: int = Option(
-        help=f"Number of search hits (current settings: {CFG.search_size},)",
+        help=f"Number of search hits (current settings: {cfg.search_size},)",
         default=None,
     ),
     elastic_index_name: str = Option(
-        help=f"Elastic Index Name (current settings: {CFG.elastic_index_name})",
+        help=f"Elastic Index Name (current settings: {cfg.elastic_index_name})",
         default=None,
     ),
 ) -> None:
@@ -140,19 +143,19 @@ def search(
         logging.getLogger().setLevel(logging.DEBUG)
 
     if search_score:
-        CFG.search_score = search_score
+        cfg.search_score = search_score
 
     if search_size:
-        CFG.search_size = search_size
+        cfg.search_size = search_size
 
     if elastic_index_name:
-        CFG.elastic_index_name = elastic_index_name
+        cfg.elastic_index_name = elastic_index_name
 
     reply = elastic.search(query=query)
 
     if len(reply) == 0:
         logging.info(
-            f"SEARCH - No results found, decrease `search-score` below {CFG.search_score}"
+            f"SEARCH - No results found, decrease `search-score` below {cfg.search_score}"
         )
         raise Exit(0)
 
@@ -171,7 +174,7 @@ def search(
     print(f"\n{reply}")
 
 
-@app.command(no_args_is_help=True)
+@cli.command(no_args_is_help=True)
 def generate(
     text: str = Option(help="LLM Prompt"),
     debug: bool = Option(help="Enable debug", default=None),
@@ -190,7 +193,7 @@ def generate(
     print(reply)
 
 
-@app.command(no_args_is_help=True)
+@cli.command(no_args_is_help=True)
 def embeddings(
     text: str = Option(help="Content"),
     debug: bool = Option(help="Enable debug", default=None),

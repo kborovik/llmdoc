@@ -68,7 +68,7 @@ build: init
 	poetry build
 
 commit: patch
-	git commit --message="v${VERSION}"
+	git commit --message="rev-${VERSION}"
 	git push
 
 clean: stop
@@ -134,6 +134,7 @@ ollama-model:
 	$(call header,Update Ollama Custom model)
 	ollama create mistral -f models/search-assistant.mistral
 
+# Functional tests
 test: ollama-model
 	set -e
 	$(call header,Test document index and search)

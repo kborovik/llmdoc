@@ -4,7 +4,7 @@ from typing import List
 
 from elasticsearch.exceptions import BadRequestError
 
-from . import CFG, ES, ElasticDoc, ElasticHits, TextChunk, llm
+from . import ElasticDoc, ElasticHits, TextChunk, cfg, es, llm
 
 elastic_mappings = {
     "properties": {
@@ -19,7 +19,7 @@ elastic_mappings = {
         },
         "embed": {
             "type": "dense_vector",
-            "dims": CFG.embed_dims,
+            "dims": cfg.embed_dims,
             "index": "true",
             "similarity": "cosine",
         },
@@ -32,7 +32,9 @@ def init() -> None:
     Initialize Elastic Storage (Index)
     """
     try:
-        ES.indices.create(index=CFG.elastic_index_name, mappings=elastic_mappings)
+        es.indices.create(
+            index=cfg.elastic_index_name, mappings=elastic_mappings
+        )
     except BadRequestError as error:
         if error.error == "resource_already_exists_exception":
             logging.info("Elastic - Index already exists")
@@ -59,9 +61,9 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
             embed=llm.embeddings(text=chunk.lemma),
         )
 
-        response = ES.index(
+        response = es.index(
             id=f"{doc_id}-{i}",
-            index=CFG.elastic_index_name,
+            index=cfg.elastic_index_name,
             document=elastic_doc.model_dump(),
         )
 
@@ -85,7 +87,7 @@ def search(query: str) -> list[ElasticHits]:
     knn = {
         "field": "embed",
         "query_vector": llm.embeddings(query),
-        "k": CFG.search_size * 2,
+        "k": cfg.search_size * 2,
         "num_candidates": 10000,
         "boost": 1.0,
     }
@@ -93,10 +95,10 @@ def search(query: str) -> list[ElasticHits]:
     logging.info(f"Elastic - Query: {query}")
     logging.debug(f"Elastic - Query: {bm25['match']['text']['query']}")
 
-    reply = ES.search(
-        index=CFG.elastic_index_name,
+    reply = es.search(
+        index=cfg.elastic_index_name,
         fields=["text"],
-        size=CFG.search_size,
+        size=cfg.search_size,
         query=bm25,
         knn=knn,
     )
@@ -105,7 +107,7 @@ def search(query: str) -> list[ElasticHits]:
     docs = []
 
     for hit in hits:
-        if hit["_score"] > CFG.search_score:
+        if hit["_score"] > cfg.search_score:
             docs.append(
                 ElasticHits(
                     id=hit["_id"],
