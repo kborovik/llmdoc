@@ -68,7 +68,7 @@ build: init
 	poetry build
 
 commit: patch
-	git commit --message="rev-${VERSION}"
+	git commit --message="version ${VERSION}"
 	git push
 
 clean: stop
