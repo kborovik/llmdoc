@@ -1,7 +1,7 @@
-import logging
 import re
 
 import spacy
+from loguru import logger
 from spacy.tokens import Doc
 
 from . import TextChunk
@@ -40,7 +40,7 @@ def chunk(
     """
     chunks = []
     size = len(doc)
-    logging.debug(f"NLP - Words in document {size}")
+    logger.debug("Words in document {}", size)
 
     for start in range(0, size, chunk_size):
         end = min(start + chunk_size, size)
@@ -52,7 +52,10 @@ def chunk(
             token.lemma_
             for token in batch
             if not (
-                token.is_punct or token.is_bracket or token.is_digit or token.is_stop
+                token.is_punct
+                or token.is_bracket
+                or token.is_digit
+                or token.is_stop
             )
         ]
         chunks.append(

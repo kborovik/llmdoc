@@ -1,22 +1,23 @@
-import logging
-from os import getenv
+import sys
 
 from elasticsearch import Elasticsearch
+from loguru import logger
 
 from .config import Config
 from .schema import ElasticDoc, ElasticHits, TextChunk
 
-logging.basicConfig(
-    level=getenv("LOGLEVEL"),
-    format="[%(relativeCreated)5dms %(levelname)s] (%(module)s.%(funcName)s) %(message)s",
-)
-
+logger.remove()
+logger.level("DEBUG", color="<blue>")
+logger.level("INFO", color="<white>")
+logger.level("SUCCESS", color="<green>")
+logger.level("ERROR", color="<red>")
+logger.add(sink=sys.stdout, level="INFO", enqueue=True)
 
 try:
     cfg = Config()
 except ValueError as e:
-    logging.error(e.errors())
-    exit(1)
+    logger.error(e)
+    sys.exit(1)
 
 es = Elasticsearch(
     hosts=f"https://{cfg.elastic_host}:{cfg.elastic_port}",

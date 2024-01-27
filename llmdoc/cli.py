@@ -1,7 +1,8 @@
 import json
-import logging
+import sys
 from pathlib import Path
 
+from loguru import logger
 from typer import Exit, Option, Typer
 
 from . import cfg, es
@@ -32,7 +33,6 @@ def storage(
     delete: bool = Option(help="Delete index", default=None),
     show: bool = Option(help="Show info", default=None),
     stats: bool = Option(help="Show stats", default=None),
-    debug: bool = Option(help="Enable debug", default=None),
 ):
     """
     Manage storage
@@ -41,38 +41,35 @@ def storage(
 
     from . import elastic
 
-    if debug:
-        logging.getLogger().setLevel(level="DEBUG")
-
     if delete:
         try:
             response = es.indices.delete(index=cfg.elastic_index_name)
         except NotFoundError:
-            logging.info("Elastic Index not found")
+            logger.info("Elastic Index not found")
     elif stats:
         try:
             response = es.indices.stats(index=cfg.elastic_index_name)
             print(json.dumps(response.body["indices"]))
         except NotFoundError:
-            logging.info("Elastic Index not found")
+            logger.info("Elastic Index not found")
     elif show:
         try:
             response = es.indices.get(index=cfg.elastic_index_name)
             print(json.dumps(response.body))
         except NotFoundError:
-            logging.info("Elastic Index not found")
+            logger.info("Elastic Index not found")
     elif create:
         elastic.init()
 
 
 @cli.command(no_args_is_help=True)
 def index(
-    file: Path = Option(help="File", resolve_path=True),
+    file: Path = Option(help="File", default=None),
     elastic_index_name: str = Option(
         help=f"Elastic Index Name (current settings: {cfg.elastic_index_name})",
         default=None,
     ),
-    debug: bool = Option(help="Enable debug", default=None),
+    debug: bool = Option(help="Debug", default=False),
 ) -> None:
     """
     Index document
@@ -80,47 +77,52 @@ def index(
     from . import elastic, nlp
 
     if debug:
-        logging.getLogger().setLevel(logging.DEBUG)
+        logger.remove()
+        logger.add(sink=sys.stdout, level="DEBUG", enqueue=True)
 
     if elastic_index_name:
         cfg.elastic_index_name = elastic_index_name
 
     if not file.is_file():
-        logging.error(f"INDEX -  {file} is not a file")
+        logger.error("{} is not a file", file)
         raise Exit(1)
 
-    logging.info(f"INDEX -  Read file {file}")
+    logger.info("Reading file {}", file)
     text = file.read_text(encoding="utf-8")
+    logger.success("Read file {}", file)
 
     doc_id = file.name
 
-    logging.info(f"INDEX - Analyzing {doc_id}")
+    logger.info("NLP Analyzing {}", doc_id)
     nlp_doc = nlp.analyze(text=text)
+    logger.success("NLP Analyzed {}", doc_id)
 
-    logging.info(f"INDEX - Splitting {doc_id} into chunks")
+    logger.info("Splitting {} into sentences chunks", doc_id)
     chunks = nlp.chunk(
         doc=nlp_doc,
         chunk_size=cfg.chunk_words,
     )
-    logging.info(f"INDEX - Generated {len(chunks)} chunks")
-
-    logging.debug(
-        f"INDEX - First Chunk\n==> Text <==\n{repr(chunks[0].text)}\n==> Lemma <==\n{repr(chunks[0].lemma)}\n"
+    logger.debug(
+        "First Chunk\n==> Text <==\n{}\n==> Lemma <==\n{}\n",
+        repr(chunks[0].text),
+        repr(chunks[0].lemma),
     )
-    logging.debug(
-        f"INDEX - Last Chunk\n==> Text <==\n{repr(chunks[-1].text)}\n==> Lemma <==\n{repr(chunks[-1].lemma)}\n"
+    logger.debug(
+        "Last Chunk\n==> Text <==\n{}\n==> Lemma <==\n{}\n",
+        repr(chunks[-1].text),
+        repr(chunks[-1].lemma),
     )
+    logger.success("Splitted into {} sentences chunks", len(chunks))
 
-    logging.info(f"INDEX - Indexing file: {doc_id}")
-
+    logger.info("Indexing file: {}", doc_id)
     elastic.init()
     elastic.index(chunks=chunks, doc_id=doc_id)
+    logger.success("Indexed file: {}", doc_id)
 
 
 @cli.command(no_args_is_help=True)
 def search(
     query: str = Option(help="Search query"),
-    debug: bool = Option(help="Enable debug", default=None),
     search_score: float = Option(
         help=f"Search score filter (current settings: {cfg.search_score})",
         default=None,
@@ -133,6 +135,7 @@ def search(
         help=f"Elastic Index Name (current settings: {cfg.elastic_index_name})",
         default=None,
     ),
+    debug: bool = Option(help="Debug", default=False),
 ) -> None:
     """
     Search documents and generate LLM response
@@ -140,7 +143,8 @@ def search(
     from . import elastic, llm
 
     if debug:
-        logging.getLogger().setLevel(logging.DEBUG)
+        logger.remove()
+        logger.add(sink=sys.stdout, level="DEBUG", enqueue=True)
 
     if search_score:
         cfg.search_score = search_score
@@ -151,24 +155,28 @@ def search(
     if elastic_index_name:
         cfg.elastic_index_name = elastic_index_name
 
+    logger.info("Search Query: {}", query)
     reply = elastic.search(query=query)
-
     if len(reply) == 0:
-        logging.info(
-            f"SEARCH - No results found, decrease `search-score` below {cfg.search_score}"
+        logger.info(
+            "No results found, decrease `search-score` below {}",
+            cfg.search_score,
         )
         raise Exit(0)
 
     context = ""
     for doc in reply:
-        logging.info(f"\nID: {doc.id}\nScore: {doc.score}\n{doc.text}\n")
+        logger.debug("\nID: {}\nScore: {}\n{}\n", doc.id, doc.score, doc.text)
         context += f"document-id {doc.id}\n{doc.text}\n\n"
+
+    logger.success("Found {} results", len(reply))
 
     prompt = f"""
         User question: \n{query}\n
         Search results: \n{context}\n
         """
 
+    logger.info("Generating LLM response")
     reply = llm.generate(prompt=prompt)
 
     print(f"\n{reply}")
@@ -177,16 +185,12 @@ def search(
 @cli.command(no_args_is_help=True)
 def generate(
     text: str = Option(help="LLM Prompt"),
-    debug: bool = Option(help="Enable debug", default=None),
 ) -> None:
     """
     Query LLM without search context
     """
 
     from . import llm
-
-    if debug:
-        logging.getLogger().setLevel(logging.DEBUG)
 
     reply = llm.generate(prompt=text)
 
@@ -196,16 +200,12 @@ def generate(
 @cli.command(no_args_is_help=True)
 def embeddings(
     text: str = Option(help="Content"),
-    debug: bool = Option(help="Enable debug", default=None),
 ):
     """
     Generate LLM embeddings
     """
 
     from . import llm
-
-    if debug:
-        logging.getLogger().setLevel(level="DEBUG")
 
     reply = llm.embeddings(text=text)
 

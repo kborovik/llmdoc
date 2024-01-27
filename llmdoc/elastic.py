@@ -1,8 +1,8 @@
 import json
-import logging
 from typing import List
 
 from elasticsearch.exceptions import BadRequestError
+from loguru import logger
 
 from . import ElasticDoc, ElasticHits, TextChunk, cfg, es, llm
 
@@ -37,9 +37,9 @@ def init() -> None:
         )
     except BadRequestError as error:
         if error.error == "resource_already_exists_exception":
-            logging.info("Elastic - Index already exists")
+            pass
         else:
-            logging.info(error.body)
+            logger.error(error.body)
             raise
 
 
@@ -67,7 +67,7 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
             document=elastic_doc.model_dump(),
         )
 
-        logging.info(f"Elastic - {json.dumps(response.body)}")
+        logger.trace(json.dumps(response.body))
 
 
 def search(query: str) -> list[ElasticHits]:
@@ -91,9 +91,6 @@ def search(query: str) -> list[ElasticHits]:
         "num_candidates": 10000,
         "boost": 1.0,
     }
-
-    logging.info(f"Elastic - Query: {query}")
-    logging.debug(f"Elastic - Query: {bm25['match']['text']['query']}")
 
     reply = es.search(
         index=cfg.elastic_index_name,
