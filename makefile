@@ -144,7 +144,7 @@ test: ollama-model
 	poetry run llmdoc search --query "Who is Mouse?"
 
 debug:
-	$(call header,Debug)
+	$(call header,Debug document index and search)
 	poetry run llmdoc storage --delete
 	poetry run llmdoc index --file tests/alice-wonderland.txt --debug
 	sleep 2

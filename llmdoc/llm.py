@@ -1,10 +1,31 @@
-import logging
+import sys
 
-import requests
+import ollama
+from loguru import logger
 
 from . import cfg
 
-session = requests.Session()
+url = f"http://{cfg.ollama_host}:{cfg.ollama_port}"
+
+client = ollama.Client(host=url)
+
+
+def stream(prompt: str) -> str:
+    """
+    Stream LLM Prompt Response
+    """
+    if not prompt:
+        raise ValueError("Prompt cannot be empty or null.")
+
+    stream = client.generate(model="mistral", prompt=prompt, stream=True)
+
+    logger.info("Streaming LLM response")
+
+    try:
+        for part in stream:
+            print(part["response"], end="", flush=True)
+    except Exception as error:
+        logger.error("Host {}, {}", url, error)
 
 
 def generate(prompt: str) -> str:
@@ -14,57 +35,28 @@ def generate(prompt: str) -> str:
     if not prompt:
         raise ValueError("Prompt cannot be empty or null.")
 
-    ollama_generate_url = (
-        f"http://{cfg.ollama_host}:{cfg.ollama_port}/api/generate"
-    )
+    logger.info("Generating LLM response")
 
-    ollama_generate_data = {
-        "prompt": prompt,
-        "model": cfg.ollama_model,
-        "stream": False,
-    }
+    try:
+        resp = client.generate(model="mistral", prompt=prompt, stream=False)
+    except Exception as error:
+        logger.error("Host {}, {}", url, error)
 
-    logging.info("LLM - Send query to Large Language Model")
-    logging.debug(f"LLM - model: {cfg.ollama_model}")
-
-    reply = session.post(url=ollama_generate_url, json=ollama_generate_data)
-
-    reply.raise_for_status()
-
-    json_data = reply.json()
-
-    total_duration = float(json_data.get("total_duration", 0.0)) / 10**9
-    context_tokens = len(json_data.get("context", ""))
-    generated_tokens = json_data.get("eval_count", 0)
-
-    logging.info(
-        f"LLM - Total time: {total_duration:.2f}s, Context tokens: {context_tokens}, Generated tokens: {generated_tokens}"
-    )
-
-    return json_data["response"]
+    return resp["response"]
 
 
-def embeddings(text: str) -> list[float]:
+def embeddings(prompt: str) -> list[float]:
     """
     Generate LLM embeddings using an external API.
     """
-    if not text:
+    if not prompt:
         raise ValueError("Text cannot be empty or null.")
 
-    ollama_embeddings_url = (
-        f"http://{cfg.ollama_host}:{cfg.ollama_port}/api/embeddings"
-    )
+    logger.debug("Embeddings text: {}", repr(prompt))
 
-    ollama_embeddings_data = {
-        "prompt": text,
-        "model": cfg.ollama_model,
-    }
+    try:
+        resp = ollama.embeddings(model=cfg.ollama_model, prompt=prompt)
+    except Exception as error:
+        logger.error("Host {}, {}", url, error)
 
-    logging.info("LLM - Generating embeddings")
-    logging.debug(f"LLM - Embeddings text: {repr(text)}")
-
-    reply = session.post(url=ollama_embeddings_url, json=ollama_embeddings_data)
-
-    reply.raise_for_status()
-
-    return reply.json()["embedding"]
+    return resp["embedding"]

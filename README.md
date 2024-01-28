@@ -1,6 +1,6 @@
 # Document Analysis and Summarization with Large Language Model (LLM)
 
-This project applies a Large Language Model (LLM) to summarize search results from ElasticSearch document queries.
+This project utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
 
 ## Document Analysis and Summarization
 

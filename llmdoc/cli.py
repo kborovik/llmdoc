@@ -64,7 +64,7 @@ def storage(
 
 @cli.command(no_args_is_help=True)
 def index(
-    file: Path = Option(help="File", default=None),
+    file: str = Option(help="File", exists=True, dir_okay=False),
     elastic_index_name: str = Option(
         help=f"Elastic Index Name (current settings: {cfg.elastic_index_name})",
         default=None,
@@ -83,21 +83,21 @@ def index(
     if elastic_index_name:
         cfg.elastic_index_name = elastic_index_name
 
+    file = Path(file).resolve()
     if not file.is_file():
         logger.error("{} is not a file", file)
         raise Exit(1)
 
     logger.info("Reading file {}", file)
     text = file.read_text(encoding="utf-8")
-    logger.success("Read file {}", file)
 
     doc_id = file.name
 
-    logger.info("NLP Analyzing {}", doc_id)
+    logger.info("Initiated NLP analysis on the document {}", doc_id)
     nlp_doc = nlp.analyze(text=text)
-    logger.success("NLP Analyzed {}", doc_id)
+    logger.success("Identified {} words", len(nlp_doc))
 
-    logger.info("Splitting {} into sentences chunks", doc_id)
+    logger.info("Splitting {} into sentence groups", doc_id)
     chunks = nlp.chunk(
         doc=nlp_doc,
         chunk_size=cfg.chunk_words,
@@ -112,12 +112,11 @@ def index(
         repr(chunks[-1].text),
         repr(chunks[-1].lemma),
     )
-    logger.success("Splitted into {} sentences chunks", len(chunks))
+    logger.success("Splitted into {} sentence groups", len(chunks))
 
-    logger.info("Indexing file: {}", doc_id)
+    logger.info("Indexing file {}", doc_id)
     elastic.init()
     elastic.index(chunks=chunks, doc_id=doc_id)
-    logger.success("Indexed file: {}", doc_id)
 
 
 @cli.command(no_args_is_help=True)
@@ -155,7 +154,7 @@ def search(
     if elastic_index_name:
         cfg.elastic_index_name = elastic_index_name
 
-    logger.info("Search Query: {}", query)
+    logger.info("Search query: {}", query)
     reply = elastic.search(query=query)
     if len(reply) == 0:
         logger.info(
@@ -176,25 +175,19 @@ def search(
         Search results: \n{context}\n
         """
 
-    logger.info("Generating LLM response")
-    reply = llm.generate(prompt=prompt)
-
-    print(f"\n{reply}")
+    llm.stream(prompt=prompt)
 
 
 @cli.command(no_args_is_help=True)
 def generate(
-    text: str = Option(help="LLM Prompt"),
+    prompt: str = Option(help="LLM Prompt"),
 ) -> None:
     """
     Query LLM without search context
     """
-
     from . import llm
 
-    reply = llm.generate(prompt=text)
-
-    print(reply)
+    llm.stream(prompt=prompt)
 
 
 @cli.command(no_args_is_help=True)
@@ -204,9 +197,8 @@ def embeddings(
     """
     Generate LLM embeddings
     """
-
     from . import llm
 
-    reply = llm.embeddings(text=text)
+    resp = llm.embeddings(prompt=text)
 
-    print(reply)
+    print(resp)

@@ -11,14 +11,14 @@ class Config(BaseSettings):
 
     elastic_ca_certs: str = "certs/ca.crt"
     elastic_host: str = "localhost"
+    elastic_port: int = 9200
     elastic_index_name: str = "llmdoc"
     elastic_password: SecretStr = None
-    elastic_port: int = 9200
     elastic_user: str = "elastic"
 
     ollama_host: str = "localhost"
-    ollama_model: str = "mistral"
     ollama_port: int = 11434
+    ollama_model: str = "mistral"
 
     embed_dims: int = 4096
 

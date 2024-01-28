@@ -58,14 +58,14 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
             name=f"{doc_id}-{i}",
             text=chunk.text,
             lemma=chunk.lemma,
-            embed=llm.embeddings(text=chunk.lemma),
+            embed=llm.embeddings(prompt=chunk.lemma),
         )
-
         response = es.index(
             id=f"{doc_id}-{i}",
             index=cfg.elastic_index_name,
             document=elastic_doc.model_dump(),
         )
+        logger.success("Indexed {}", f"{doc_id}-{i}")
 
         logger.trace(json.dumps(response.body))
 
@@ -86,7 +86,7 @@ def search(query: str) -> list[ElasticHits]:
 
     knn = {
         "field": "embed",
-        "query_vector": llm.embeddings(query),
+        "query_vector": llm.embeddings(prompt=query),
         "k": cfg.search_size * 2,
         "num_candidates": 10000,
         "boost": 1.0,
