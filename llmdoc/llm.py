@@ -1,5 +1,3 @@
-import sys
-
 import ollama
 from loguru import logger
 
@@ -24,6 +22,7 @@ def pull(model: str = cfg.ollama_model) -> None:
             client.pull(model=cfg.ollama_model)
         except Exception as error:
             logger.error(error)
+
         logger.success("Pulled LLM model {}", cfg.ollama_model)
 
 

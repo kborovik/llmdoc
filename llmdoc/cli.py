@@ -168,10 +168,7 @@ def search(
 
     logger.success("Found {} results", len(reply))
 
-    prompt = f"""
-        User question: \n{query}\n
-        Search results: \n{context}\n
-        """
+    prompt = f"\nUser question: {query}\nSearch results:\n{context}\n"
 
     llm.stream(prompt=prompt)
 
@@ -185,7 +182,11 @@ def generate(
     """
     from . import llm
 
-    llm.stream(prompt=prompt)
+    try:
+        llm.stream(prompt=prompt)
+    except Exception as error:
+        logger.error(error)
+        sys.exit(1)
 
 
 @cli.command(no_args_is_help=True)
@@ -197,7 +198,11 @@ def embeddings(
     """
     from . import llm
 
-    resp = llm.embeddings(prompt=text)
+    try:
+        resp = llm.embeddings(prompt=text)
+    except Exception as error:
+        logger.error(error)
+        sys.exit(1)
 
     print(resp)
 
@@ -211,4 +216,8 @@ def model(
     """
     from . import llm
 
-    llm.pull(model=name)
+    try:
+        llm.pull(model=name)
+    except Exception as error:
+        logger.error(error)
+        sys.exit(1)
