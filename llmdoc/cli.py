@@ -93,9 +93,7 @@ def index(
 
     doc_id = file.name
 
-    logger.info("Initiated NLP analysis on the document {}", doc_id)
     nlp_doc = nlp.analyze(text=text)
-    logger.success("Identified {} words", len(nlp_doc))
 
     logger.info("Splitting {} into sentence groups", doc_id)
     chunks = nlp.chunk(
@@ -192,7 +190,7 @@ def generate(
 
 @cli.command(no_args_is_help=True)
 def embeddings(
-    text: str = Option(help="Content"),
+    text: str = Option(help="Embeddings text"),
 ):
     """
     Generate LLM embeddings
@@ -202,3 +200,15 @@ def embeddings(
     resp = llm.embeddings(prompt=text)
 
     print(resp)
+
+
+@cli.command(no_args_is_help=False)
+def model(
+    name: str = Option(help="Ollama model name", default=cfg.ollama_model),
+):
+    """
+    Pull Ollama LLM model
+    """
+    from . import llm
+
+    llm.pull(model=name)

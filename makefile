@@ -131,24 +131,19 @@ shell-elastic:
 	docker container exec --tty --interactive elastic-1 /bin/bash
 
 ollama-model:
-	$(call header,Update Ollama Custom model)
-	ollama create mistral -f models/search-assistant.mistral
+	poetry run llmdoc model
 
-# Functional tests
-test: ollama-model
+test: test-index test-search
+
+test-index: ollama-model
 	set -e
-	$(call header,Test document index and search)
+	$(call header,Test Indexing)
 	poetry run llmdoc storage --delete
 	poetry run llmdoc index --file tests/alice-wonderland.txt
-	sleep 2
-	poetry run llmdoc search --query "Who is Mouse?"
 
-debug:
-	$(call header,Debug document index and search)
-	poetry run llmdoc storage --delete
-	poetry run llmdoc index --file tests/alice-wonderland.txt --debug
-	sleep 2
-	poetry run llmdoc search --query "Who is Mouse?" --debug
+test-search: ollama-model
+	$(call header,Test Search)
+	poetry run llmdoc search --query "Who is Mouse?"
 
 ###############################################################################
 # Functions

@@ -18,7 +18,7 @@ class Config(BaseSettings):
 
     ollama_host: str = "localhost"
     ollama_port: int = 11434
-    ollama_model: str = "mistral"
+    ollama_model: str = "mistral:latest"
 
     embed_dims: int = 4096
 

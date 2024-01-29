@@ -12,7 +12,7 @@
       "args": [
         "index",
         "--file",
-        "tests/test-text.txt"
+        "tests/alice-wonderland.txt"
       ],
       "justMyCode": true
     },

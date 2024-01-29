@@ -19,9 +19,15 @@ def analyze(text: str) -> Doc:
     Returns:
         Doc: The analyzed document as spacy.tokens.Doc.
     """
-    text = re.sub(r"[\n\t]+", " ", text)
 
-    return nlp(text)
+    logger.info("Start NLP analysis")
+
+    text = re.sub(r"[\n\t]+", " ", text)
+    document = nlp(text)
+
+    logger.success("Finished NLP analysis. Identified {} words", len(document))
+
+    return document
 
 
 def chunk(
@@ -40,7 +46,6 @@ def chunk(
     """
     chunks = []
     size = len(doc)
-    logger.debug("Words in document {}", size)
 
     for start in range(0, size, chunk_size):
         end = min(start + chunk_size, size)
