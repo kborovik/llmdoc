@@ -12,7 +12,6 @@ def pull(model: str = cfg.ollama_model) -> None:
     """
     Pull LLM Model
     """
-
     resp = client.list()
     models = [item["name"] for item in resp["models"]]
 
@@ -33,13 +32,27 @@ def stream(prompt: str) -> None:
     if not prompt:
         raise ValueError("Prompt cannot be empty or null.")
 
-    stream = client.generate(model=cfg.ollama_model, prompt=prompt, stream=True)
+    stream = client.generate(
+        model=cfg.ollama_model,
+        prompt=prompt,
+        stream=True,
+        options=cfg.ollama_options,
+    )
 
-    logger.info("Streaming LLM response")
+    logger.info("Streaming LLM response\n")
 
     try:
         for part in stream:
             print(part["response"], end="", flush=True)
+
+            if part["done"]:
+                logger.success(
+                    "Prompt+Context size {} tokens. Response size {} tokens",
+                    part["prompt_eval_count"],
+                    part["eval_count"],
+                )
+        print("\n")
+
     except Exception as error:
         logger.error("Host {}, {}", url, error)
 
@@ -55,7 +68,10 @@ def generate(prompt: str) -> str:
 
     try:
         resp = client.generate(
-            model=cfg.ollama_model, prompt=prompt, stream=False
+            model=cfg.ollama_model,
+            prompt=prompt,
+            stream=False,
+            options=cfg.ollama_options,
         )
     except Exception as error:
         logger.error("Host {}, {}", url, error)

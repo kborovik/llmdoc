@@ -125,7 +125,7 @@ def search(
         default=None,
     ),
     search_size: int = Option(
-        help=f"Number of search hits (current settings: {cfg.search_size},)",
+        help=f"Number of search hits (current settings: {cfg.search_size})",
         default=None,
     ),
     elastic_index_name: str = Option(
@@ -153,8 +153,10 @@ def search(
         cfg.elastic_index_name = elastic_index_name
 
     logger.info("Search query: {}", query)
-    reply = elastic.search(query=query)
-    if len(reply) == 0:
+
+    resp = elastic.search(query=query)
+
+    if len(resp) == 0:
         logger.info(
             "No results found, decrease `search-score` below {}",
             cfg.search_score,
@@ -162,13 +164,18 @@ def search(
         raise Exit(0)
 
     context = ""
-    for doc in reply:
-        logger.debug("\nID: {}\nScore: {}\n{}\n", doc.id, doc.score, doc.text)
+    for doc in resp:
+        logger.opt(ansi=True).debug(
+            "\n<yellow>ID: {}\nScore: {}</yellow>\n{}\n",
+            doc.id,
+            doc.score,
+            doc.text,
+        )
         context += f"document-id {doc.id}\n{doc.text}\n\n"
 
-    logger.success("Found {} results", len(reply))
+    logger.success("Found {} results", len(resp))
 
-    prompt = f"\nUser question: {query}\nSearch results:\n{context}\n"
+    prompt = f"\nUser question: {query}\nSummarize search results:\n{context}\n"
 
     llm.stream(prompt=prompt)
 

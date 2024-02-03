@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "index",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "llmdoc",
       "args": [
@@ -18,29 +18,25 @@
     },
     {
       "name": "search",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "llmdoc",
       "args": [
         "search",
         "--query",
-        "what protestors demanded?",
-        "--elastic-index-name",
-        "llmdoc-test",
-        "--search-score",
-        "0.7",
+        "Who is Mouse?",
       ],
       "justMyCode": true
     },
     {
       "name": "generate",
-      "type": "python",
+      "type": "debugpy",
       "request": "launch",
       "module": "llmdoc",
       "args": [
         "generate",
         "--prompt",
-        "what protestors demanded?",
+        "Who is Mouse?",
       ],
       "justMyCode": true
     },
