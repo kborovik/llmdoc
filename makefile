@@ -53,7 +53,7 @@ docker: build
 	--platform="linux/amd64" \
 	--file=Dockerfile dist
 
-release: build docker
+release: commit build docker
 	$(call header,Create GitHub Release)
 	gh release create ${VERSION} dist/${app_name}-${VERSION}-py3-none-any.whl --title "Release ${VERSION}" --notes "Release ${VERSION}"
 
@@ -67,15 +67,14 @@ upgrade:
 	poetry install
 	git add poetry.lock
 
-patch:
+version-patch:
 	poetry version patch
-	git add --all
 
-minor:
+version-minor:
 	poetry version minor
-	git add --all
 
-commit: patch
+commit:
+	git add --all
 	git commit --message="version ${VERSION}"
 	git push
 
