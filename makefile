@@ -10,6 +10,7 @@ default: settings
 ###############################################################################
 app_name := llmdoc
 VERSION := $(shell awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
+docker_registry := ghcr.io/kborovik
 
 ELASTIC_VERSION := 8.12.0
 ELASTIC_PASSWORD ?= $(shell grep -i ELASTIC_PASSWORD .env | cut -d "=" -f 2)
@@ -43,6 +44,18 @@ init: python-init .elastic-init
 
 build:
 	poetry build
+
+docker: build
+	docker buildx build \
+	--tag="${docker_registry}/${app_name}:${VERSION}" \
+	--tag="${docker_registry}/${app_name}:latest" \
+	--build-arg="VERSION=${VERSION}" \
+	--platform="linux/amd64" \
+	--file=Dockerfile dist
+
+release: build docker
+	$(call header,Create GitHub Release)
+	gh release create ${VERSION} dist/${app_name}-${VERSION}-py3-none-any.whl --title "Release ${VERSION}" --notes "Release ${VERSION}"
 
 install: build
 	$(call header,Install PIPX ${app_name})

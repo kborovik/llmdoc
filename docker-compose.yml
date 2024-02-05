@@ -106,6 +106,31 @@ services:
         source: ollama
         target: /root/.ollama
 
+  llmdoc:
+    image: ghcr.io/kborovik/llmdoc:${VERSION:-latest}
+    container_name: llmdoc-1
+    hostname: llmdoc-1
+    environment:
+      - elastic_ca_certs=/certs/ca.crt
+      - elastic_password=${ELASTIC_PASSWORD:?err}
+    ports:
+      - 8000:8000
+    depends_on:
+      setup:
+        condition: service_completed_successfully
+      elastic:
+        condition: service_healthy
+    healthcheck:
+      test: curl http://127.0.0.1:8000/health
+      interval: 10s
+      timeout: 2s
+      retries: 6
+    volumes:
+      - type: volume
+        source: certs
+        target: /certs
+        read_only: true
+
 networks:
   default:
     name: llmdoc
