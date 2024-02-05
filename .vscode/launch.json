@@ -12,7 +12,7 @@
       "args": [
         "index",
         "--file",
-        "tests/alice-wonderland.txt"
+        "tests/test.txt"
       ],
       "justMyCode": true
     },
@@ -24,7 +24,7 @@
       "args": [
         "search",
         "--query",
-        "Who is Mouse?",
+        "Who is Count Von Kramm?",
       ],
       "justMyCode": true
     },
@@ -36,7 +36,7 @@
       "args": [
         "generate",
         "--prompt",
-        "Who is Mouse?",
+        "Why Earth is flat?",
       ],
       "justMyCode": true
     },

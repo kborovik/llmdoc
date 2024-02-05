@@ -7,10 +7,11 @@ from .config import Config
 from .schema import ElasticDoc, ElasticHits, TextChunk
 
 logger.remove()
-logger.level("DEBUG", color="<blue>")
+logger.level("ERROR", color="<red>")
+logger.level("WARNING", color="<yellow>")
 logger.level("INFO", color="<white>")
 logger.level("SUCCESS", color="<green>")
-logger.level("ERROR", color="<red>")
+logger.level("DEBUG", color="<blue>")
 logger.add(sink=sys.stdout, level="INFO", enqueue=True)
 
 try:

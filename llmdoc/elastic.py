@@ -77,7 +77,7 @@ def search(query: str) -> list[ElasticHits]:
         "match": {
             "text": {
                 "query": query,
-                "boost": 1.0,
+                "boost": cfg.elastic_bm25_boost,
             },
         },
     }
@@ -85,15 +85,15 @@ def search(query: str) -> list[ElasticHits]:
     knn = {
         "field": "embed",
         "query_vector": llm.embeddings(prompt=query),
-        "k": cfg.search_size * 2,
+        "k": cfg.elastic_search_size * 2,
         "num_candidates": 10000,
-        "boost": 1.0,
+        "boost": cfg.elastic_knn_boost,
     }
 
     reply = es.search(
         index=cfg.elastic_index_name,
         fields=["text"],
-        size=cfg.search_size,
+        size=cfg.elastic_search_size,
         query=bm25,
         knn=knn,
     )
@@ -102,7 +102,7 @@ def search(query: str) -> list[ElasticHits]:
     docs = []
 
     for hit in hits:
-        if hit["_score"] > cfg.search_score:
+        if hit["_score"] > cfg.elastic_search_score:
             docs.append(
                 ElasticHits(
                     id=hit["_id"],

@@ -41,13 +41,18 @@ settings:
 
 init: python-init .elastic-init
 
-install:
+build:
+	poetry build
+
+install: build
 	$(call header,Install PIPX ${app_name})
-	pipx install .
+	pipx install --force dist/${app_name}-${VERSION}-py3-none-any.whl
 
 upgrade:
-	$(call header,Upgrade PIPX ${app_name})
-	pipx upgrade ${app_name}
+	$(call header,Upgrade ${app_name})
+	poetry lock
+	poetry install
+	git add poetry.lock
 
 patch:
 	poetry version patch
@@ -56,16 +61,6 @@ patch:
 minor:
 	poetry version minor
 	git add --all
-
-rebuild:
-	set -e
-	$(call header,Delete Elastic Index)
-	poetry run llmdoc storage --delete
-	$(call header,Add Document to Elastic)
-	poetry run llmdoc index --file tests/happy-prince-by-oscar-wilde.txt
-
-build: init
-	poetry build
 
 commit: patch
 	git commit --message="version ${VERSION}"
@@ -89,6 +84,9 @@ status:
 
 stop:
 	docker compose down --remove-orphans
+
+run:
+	poetry run uvicorn llmdoc.api_v1:app --interface=wsgi --host=0.0.0.0 --no-access-log --reload --reload-dir=llmdoc
 
 python-init:
 	$(call header,Initialize Python Environment)
@@ -115,6 +113,13 @@ python-env-activate:
 	openssl rsa -passin pass:elastic-1 -in config/certs/instance.key -out config/certs/instance.key && chown -R 1000 config/certs"
 	touch $@
 
+index:
+	set -e
+	$(call header,Delete Elastic Index)
+	poetry run llmdoc storage --delete
+	$(call header,Add Document to Elastic)
+	poetry run llmdoc index --file tests/sherlock-holmes.txt
+
 shell-elastic-init:
 	$(call header,Init Elastic and Kibana)
 	docker container run \
@@ -130,20 +135,19 @@ shell-ollama:
 shell-elastic:
 	docker container exec --tty --interactive elastic-1 /bin/bash
 
-ollama-model:
-	poetry run llmdoc model
-
 test: test-index test-search
 
 test-index: ollama-model
 	set -e
 	$(call header,Test Indexing)
 	poetry run llmdoc storage --delete
-	poetry run llmdoc index --file tests/alice-wonderland.txt
+	poetry run llmdoc index --file tests/test.txt
 
 test-search: ollama-model
-	$(call header,Test Search)
-	poetry run llmdoc search --query "Who is Mouse?"
+	$(call header,Prompt WITHOUT search query)
+	llmdoc generate --prompt "Who is Count Von Kramm?"
+	$(call header,Prompt WITH search query)
+	poetry run llmdoc search --query "Who is Count Von Kramm?"
 
 ###############################################################################
 # Functions

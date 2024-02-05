@@ -1,4 +1,4 @@
-# Document Analysis and Summarization with Large Language Model (LLM)
+# Generative AI to Power Intelligent Search and Question Answering in Elasticsearch
 
 This project utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
 

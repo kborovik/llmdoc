@@ -1,3 +1,5 @@
+from typing import Any, Mapping
+
 import ollama
 from loguru import logger
 
@@ -39,32 +41,27 @@ def stream(prompt: str) -> None:
         options=cfg.ollama_options,
     )
 
-    logger.info("Streaming LLM response\n")
-
     try:
         for part in stream:
             print(part["response"], end="", flush=True)
 
             if part["done"]:
-                logger.success(
-                    "Prompt+Context size {} tokens. Response size {} tokens",
-                    part["prompt_eval_count"],
-                    part["eval_count"],
+                print("\n")
+                logger.opt(ansi=True).success(
+                    "Prompt+Context size <yellow>{}</yellow> tokens. Response size <yellow>{}</yellow> tokens",
+                    part.get("prompt_eval_count"),
+                    part.get("eval_count"),
                 )
-        print("\n")
-
     except Exception as error:
         logger.error("Host {}, {}", url, error)
 
 
-def generate(prompt: str) -> str:
+def generate(prompt: str) -> Mapping[str, Any]:
     """
     Generate LLM Prompt Response
     """
     if not prompt:
         raise ValueError("Prompt cannot be empty or null.")
-
-    logger.info("Generating LLM response")
 
     try:
         resp = client.generate(
@@ -76,12 +73,17 @@ def generate(prompt: str) -> str:
     except Exception as error:
         logger.error("Host {}, {}", url, error)
 
-    return resp["response"]
+    return {
+        "eval_count": resp.get("eval_count"),
+        "eval_duration": resp.get("eval_duration"),
+        "prompt_eval_count": resp.get("prompt_eval_count"),
+        "response": resp.get("response"),
+    }
 
 
 def embeddings(prompt: str) -> list[float]:
     """
-    Generate LLM embeddings using an external API.
+    Generate LLM embeddings.
     """
     if not prompt:
         raise ValueError("Text cannot be empty or null.")

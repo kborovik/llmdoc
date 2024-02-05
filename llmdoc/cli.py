@@ -42,10 +42,12 @@ def storage(
     from . import elastic
 
     if delete:
+        logger.info("Deleting Elastic Index {}", cfg.elastic_index_name)
         try:
             response = es.indices.delete(index=cfg.elastic_index_name)
         except NotFoundError:
             logger.info("Elastic Index not found")
+        logger.success("Deleted Elastic Index {}", cfg.elastic_index_name)
     elif stats:
         try:
             response = es.indices.stats(index=cfg.elastic_index_name)
@@ -121,11 +123,11 @@ def index(
 def search(
     query: str = Option(help="Search query"),
     search_score: float = Option(
-        help=f"Search score filter (current settings: {cfg.search_score})",
+        help=f"Search score filter (current settings: {cfg.elastic_search_score})",
         default=None,
     ),
     search_size: int = Option(
-        help=f"Number of search hits (current settings: {cfg.search_size})",
+        help=f"Number of search hits (current settings: {cfg.elastic_search_size})",
         default=None,
     ),
     elastic_index_name: str = Option(
@@ -144,10 +146,10 @@ def search(
         logger.add(sink=sys.stdout, level="DEBUG", enqueue=True)
 
     if search_score:
-        cfg.search_score = search_score
+        cfg.elastic_search_score = search_score
 
     if search_size:
-        cfg.search_size = search_size
+        cfg.elastic_search_size = search_size
 
     if elastic_index_name:
         cfg.elastic_index_name = elastic_index_name
@@ -157,9 +159,9 @@ def search(
     resp = elastic.search(query=query)
 
     if len(resp) == 0:
-        logger.info(
+        logger.warning(
             "No results found, decrease `search-score` below {}",
-            cfg.search_score,
+            cfg.elastic_search_score,
         )
         raise Exit(0)
 
@@ -171,11 +173,11 @@ def search(
             doc.score,
             doc.text,
         )
-        context += f"document-id {doc.id}\n{doc.text}\n\n"
+        context += f"\n{doc.text}\n"
 
     logger.success("Found {} results", len(resp))
 
-    prompt = f"\nUser question: {query}\nSummarize search results:\n{context}\n"
+    prompt = f"Answer user question based on the search results.\nUser question: {query}.\nSearch results:\n{context}\n"
 
     llm.stream(prompt=prompt)
 
@@ -183,17 +185,18 @@ def search(
 @cli.command(no_args_is_help=True)
 def generate(
     prompt: str = Option(help="LLM Prompt"),
+    stream: bool = Option(help="Stream response", default=True),
 ) -> None:
     """
     Query LLM without search context
     """
     from . import llm
 
-    try:
+    if stream:
         llm.stream(prompt=prompt)
-    except Exception as error:
-        logger.error(error)
-        sys.exit(1)
+    else:
+        repl = llm.generate(prompt=prompt)
+        print(json.dumps(repl))
 
 
 @cli.command(no_args_is_help=True)
