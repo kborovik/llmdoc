@@ -14,13 +14,8 @@ docker_registry := ghcr.io/kborovik
 docker_image ?= ${docker_registry}/${app_name}
 
 ELASTIC_VERSION := 8.12.0
+ELASTIC_USER ?= elastic
 ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
-
-ifeq ($(ELASTIC_PASSWORD),)
-ELASTIC_PASSWORD := MyBigPass45
-endif
-
-LOGLEVEL ?= INFO
 
 ###############################################################################
 # Files
@@ -37,18 +32,21 @@ ${ca_crt}:
 settings:
 	echo "#######################################################################"
 	echo "# VERSION=${VERSION}"
+	echo "# ELASTIC_USER=${ELASTIC_USER}"
 	echo "# ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
 	echo "# docker_image=${docker_registry}/${app_name}:${VERSION}"
 	echo "#######################################################################"
 
-init: .elastic-init
+init: .elastic-init .env start ${ca_crt}
 
 build: build-poetry build-docker
 
 build-poetry:
+	$(call header,Build Python Wheel)
 	poetry build --format=wheel
 
 build-docker:
+	$(call header,Build Docker Image)
 	poetry export --format requirements.txt --output dist/requirements.txt --without-hashes
 	docker buildx build \
 	--tag="${docker_image}:${VERSION}" \
@@ -82,16 +80,15 @@ release: commit build
 
 clean: stop
 	$(call header,Remove Python files)
-	rm -rf **/__pycache__ **/**/__pycache__ dist ${ca_crt} .elastic-init poetry.lock
-	pipx uninstall ${app_name} || true
+	rm -rf **/__pycache__ **/**/__pycache__ dist ${ca_crt} .elastic-init
 	$(call header,Remove Docker volumes)
 	docker volume rm elastic || true
 	docker volume rm kibana || true
 	docker volume rm certs || true
 
-start: init build 
+start: build 
+	$(call header,Start Docker Compose)
 	docker compose up --detach --remove-orphans --wait
-	${MAKE} ${ca_crt}
 
 status:
 	docker container ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
@@ -104,6 +101,9 @@ run:
 
 python-env-activate:
 	echo "source $$(poetry env info --path)/bin/activate"
+
+.env:
+	echo "ELASTIC_PASSWORD=MyBigPass45" > $@
 
 .elastic-init:
 	set -e
@@ -143,14 +143,15 @@ shell-ollama:
 shell-elastic:
 	docker container exec --tty --interactive elastic-1 /bin/bash
 
-test: test-index test-search
+test: start test-index test-search
 
 ollama-model:
+	$(call header,Pull Ollama Model)
 	poetry run llmdoc model
 
 test-index: ollama-model
-	set -e
 	$(call header,Test Indexing)
+	set -e
 	poetry run llmdoc storage --delete
 	poetry run llmdoc index --file tests/test.txt
 

@@ -26,8 +26,8 @@ The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze 
 ```shell
 git clone https://github.com/kborovik/llmdoc.git
 cd llmdoc
-echo "ELASTIC_PASSWORD=MyBigPass45" >> .env
-make init build start test
+echo "ELASTIC_PASSWORD=MyBigPass45" > .env
+make init start test
 ```
 
 # Demo

@@ -3,7 +3,7 @@ import sys
 from pathlib import Path
 
 from loguru import logger
-from typer import Exit, Option, Typer
+from typer import Option, Typer
 
 from . import cfg, es
 
@@ -88,7 +88,7 @@ def index(
     file = Path(file).resolve()
     if not file.is_file():
         logger.error("{} is not a file", file)
-        raise Exit(1)
+        sys.exit(1)
 
     logger.info("Reading file {}", file)
     text = file.read_text(encoding="utf-8")
@@ -156,14 +156,18 @@ def search(
 
     logger.info("Search query: {}", query)
 
-    resp = elastic.search(query=query)
+    try:
+        resp = elastic.search(query=query)
+    except Exception as error:
+        logger.error(error)
+        sys.exit(1)
 
     if len(resp) == 0:
         logger.warning(
             "No results found, decrease `search-score` below {}",
             cfg.elastic_search_score,
         )
-        raise Exit(0)
+        sys.exit(0)
 
     context = ""
     for doc in resp:
