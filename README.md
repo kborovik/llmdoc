@@ -1,4 +1,4 @@
-# Generative AI to Power Intelligent Search and Question Answering in Elasticsearch
+# Question Answering with Generative AI and Elasticsearch
 
 This project utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
 
@@ -15,19 +15,34 @@ The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze 
 5. Generation of embeddings using a Large Language Model
 6. Storage of the generated document in an ElasticSearch index
 
+# Quick Start
+
+- Clone GitHub repository
+- Set ELASTIC_PASSWORD
+- Initialize repository (setup Python and ElasticSearch environment)
+- Start Docker Compose (ElasticSearch, Kibana, Ollama LLM Model)
+- Run end-to-end test
+
+```shell
+git clone https://github.com/kborovik/llmdoc.git
+cd llmdoc
+echo "ELASTIC_PASSWORD=MyBigPass45" >> .env
+make init build start test
+```
+
 # Demo
+
 
 # Prerequisites
 
-The deployment was tested on Ubuntu 22.04 (x86_64 architecture) and macOS 14 (Apple silicon/arm64 architecture). Although Windows Subsystem for Linux (WSL) could potentially support the deployment, compatibility in that environment was not verified firsthand.
+The deployment was tested on Ubuntu 22.04 (linux/amd64 architecture). Although Windows Subsystem for Linux (WSL) could potentially support the deployment, compatibility in that environment was not verified firsthand.
 
-## Docker
+Install:
 
-**Install Docker**
+- **docker** https://docs.docker.com/engine/install
+- **poetry** https://github.com/python-poetry/poetry
 
-https://docs.docker.com/engine/install/
-
-## For Linux
+## NVIDIA GPU Support
 
 **Install NVIDIA `apt` network repository for Ubuntu**
 
@@ -43,25 +58,6 @@ sudo apt install nvidia-headless-545
 
 ```
 sudo apt install nvidia-docker2
-```
-
-## For macOS
-
-# Quick Start
-
-- Clone GitHub repository
-- Set ELASTIC_PASSWORD
-- Initialize repository (setup Python and ElasticSearch environment)
-- Start Docker Compose (ElasticSearch, Kibana, Ollama LLM Model)
-- Run end-to-end test
-
-```shell
-git clone https://github.com/kborovik/llmdoc.git
-cd llmdoc
-echo "ELASTIC_PASSWORD=MyBigPass45" >> .env
-make init
-make start
-make test
 ```
 
 # Configuration

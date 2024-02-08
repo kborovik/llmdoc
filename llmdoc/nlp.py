@@ -2,43 +2,43 @@ import re
 
 import spacy
 from loguru import logger
-from spacy.tokens import Doc
+from spacy.tokens import Doc as NlpDoc
 
 from . import TextChunk
 
 nlp = spacy.load("en_core_web_sm")
 
 
-def analyze(text: str) -> Doc:
+def analyze(text: str) -> NlpDoc:
     """
     Analyze text with NLP
 
     Args:
-        text (str): The text to be analyzed.
+        text (str): The text to be analyzed
 
     Returns:
-        Doc: The analyzed document as spacy.tokens.Doc.
+        NlpDoc: The analyzed document
     """
 
     logger.info("Start NLP analysis")
 
     text = re.sub(r"[\n\t]+", " ", text)
-    document = nlp(text)
+    nlp_doc = nlp(text)
 
-    logger.success("Finished NLP analysis. Identified {} words", len(document))
+    logger.success("Finished NLP analysis. Identified {} words", len(nlp_doc))
 
-    return document
+    return nlp_doc
 
 
 def chunk(
-    doc: Doc,
+    doc: NlpDoc,
     chunk_size: int = 300,
 ) -> list[TextChunk]:
     """
     Group text into word chunks
 
     Parameters:
-        doc (Doc): The input spaCy Doc object containing the text to be chunked.
+        doc (NlpDoc): The input spaCy NlpDoc object containing the text to be chunked.
         chunk_size (int, optional): The size of each chunk in number of words. Defaults to 300.
 
     Returns:

@@ -11,6 +11,7 @@ default: settings
 app_name := llmdoc
 VERSION := $(shell awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 docker_registry := ghcr.io/kborovik
+docker_image ?= ${docker_registry}/${app_name}
 
 ELASTIC_VERSION := 8.12.0
 ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
@@ -36,36 +37,33 @@ ${ca_crt}:
 settings:
 	echo "#######################################################################"
 	echo "# VERSION=${VERSION}"
-	echo "# LOGLEVEL=${LOGLEVEL}"
 	echo "# ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
+	echo "# docker_image=${docker_registry}/${app_name}:${VERSION}"
 	echo "#######################################################################"
 
-init: python-init .elastic-init
+init: .elastic-init
 
-build:
-	poetry build
+build: build-poetry build-docker
 
-docker: build
+build-poetry:
+	poetry build --format=wheel
+
+build-docker:
+	poetry export --format requirements.txt --output dist/requirements.txt --without-hashes
 	docker buildx build \
-	--tag="${docker_registry}/${app_name}:${VERSION}" \
-	--tag="${docker_registry}/${app_name}:latest" \
+	--tag="${docker_image}:${VERSION}" \
+	--tag="${docker_image}:latest" \
 	--build-arg="VERSION=${VERSION}" \
-	--platform="linux/amd64" \
-	--file=Dockerfile dist
-
-release: commit build docker
-	$(call header,Create GitHub Release)
-	gh release create ${VERSION} dist/${app_name}-${VERSION}-py3-none-any.whl --title "Release ${VERSION}" --notes "Release ${VERSION}"
+	--file=Dockerfile dist/
 
 install: build
 	$(call header,Install PIPX ${app_name})
 	pipx install --force dist/${app_name}-${VERSION}-py3-none-any.whl
 
-upgrade:
+update:
 	$(call header,Upgrade ${app_name})
 	poetry lock
 	poetry install
-	git add poetry.lock
 
 version-patch:
 	poetry version patch
@@ -73,10 +71,15 @@ version-patch:
 version-minor:
 	poetry version minor
 
-commit:
+commit: version-patch
+	VERSION := $(shell awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	git add --all
 	git commit --message="version ${VERSION}"
-	git push
+# git push
+
+release: commit build
+	$(call header,Create GitHub Release)
+	gh release create ${VERSION} dist/${app_name}-${VERSION}-py3-none-any.whl --title "Release ${VERSION}" --notes "Release ${VERSION}"
 
 clean: stop
 	$(call header,Remove Python files)
@@ -86,7 +89,6 @@ clean: stop
 	docker volume rm elastic || true
 	docker volume rm kibana || true
 	docker volume rm certs || true
-	docker volume rm ollama || true
 
 start:
 	docker compose up --detach --remove-orphans --wait
@@ -100,12 +102,6 @@ stop:
 
 run:
 	poetry run uvicorn llmdoc.api_v1:app --interface=wsgi --host=0.0.0.0 --no-access-log --reload --reload-dir=llmdoc
-
-python-init:
-	$(call header,Initialize Python Environment)
-	pipx install poetry
-	poetry lock
-	poetry install
 
 python-env-activate:
 	echo "source $$(poetry env info --path)/bin/activate"
@@ -150,6 +146,9 @@ shell-elastic:
 
 test: test-index test-search
 
+ollama-model:
+	poetry run llmdoc model
+
 test-index: ollama-model
 	set -e
 	$(call header,Test Indexing)
@@ -158,7 +157,7 @@ test-index: ollama-model
 
 test-search: ollama-model
 	$(call header,Prompt WITHOUT search query)
-	llmdoc generate --prompt "Who is Count Von Kramm?"
+	poetry run llmdoc generate --prompt "Who is Count Von Kramm?"
 	$(call header,Prompt WITH search query)
 	poetry run llmdoc search --query "Who is Count Von Kramm?"
 
@@ -176,9 +175,9 @@ endef
 # Errors
 ###############################################################################
 ifeq ($(shell command -v docker),)
-$(error ==> Install Docker <==)
+$(error ==> Install Docker https://docs.docker.com/ <==)
 endif
 
-ifeq ($(shell command -v pipx),)
-$(error ==> Install Python PIPX <==)
+ifeq ($(shell command -v poetry),)
+$(error ==> Install Python `poetry`  https://github.com/python-poetry/poetry <==)
 endif

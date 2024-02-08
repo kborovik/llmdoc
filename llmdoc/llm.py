@@ -1,4 +1,4 @@
-from typing import Any, Mapping
+from typing import Any, List, Mapping
 
 import ollama
 from loguru import logger
@@ -81,7 +81,7 @@ def generate(prompt: str) -> Mapping[str, Any]:
     }
 
 
-def embeddings(prompt: str) -> list[float]:
+def embeddings(prompt: str) -> List[float]:
     """
     Generate LLM embeddings.
     """
