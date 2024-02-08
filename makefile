@@ -75,7 +75,6 @@ commit: version-patch
 	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	git add --all
 	git commit --message="version $${version}"
-# git push
 
 release: commit build
 	$(call header,Create GitHub Release)
@@ -90,7 +89,7 @@ clean: stop
 	docker volume rm kibana || true
 	docker volume rm certs || true
 
-start:
+start: init build 
 	docker compose up --detach --remove-orphans --wait
 	${MAKE} ${ca_crt}
 
