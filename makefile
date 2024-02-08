@@ -72,9 +72,9 @@ version-minor:
 	poetry version minor
 
 commit: version-patch
-	VERSION := $(shell awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
+	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	git add --all
-	git commit --message="version ${VERSION}"
+	git commit --message="version $${version}"
 # git push
 
 release: commit build
