@@ -116,7 +116,12 @@ def index(
 
     logger.info("Indexing file {}", doc_id)
     elastic.init()
-    elastic.index(chunks=chunks, doc_id=doc_id)
+
+    try:
+        elastic.index(chunks=chunks, doc_id=doc_id)
+    except Exception as error:
+        logger.error(error)
+        sys.exit(1)
 
 
 @cli.command(no_args_is_help=True)
@@ -172,16 +177,17 @@ def search(
     context = ""
     for doc in resp:
         logger.opt(ansi=True).debug(
-            "\n<yellow>ID: {}\nScore: {}</yellow>\n{}\n",
+            "\n<yellow>Document-ID: {}\nScore: {}</yellow>\n{}\n",
             doc.id,
             doc.score,
             doc.text,
         )
-        context += f"\n{doc.text}\n"
+        context += f"\nDocument-ID {doc.id}\n{doc.text}\n\n"
 
+    logger.trace("Query context: {}", context)
     logger.success("Found {} results", len(resp))
 
-    prompt = f"Answer user question based on the search results.\nUser question: {query}.\nSearch results:\n{context}\n"
+    prompt = f"Answer user question based on search results. Explain answer by referencing Document-ID.\nUser question: {query}.\nSearch results:\n\n{context}\n"
 
     llm.stream(prompt=prompt)
 
