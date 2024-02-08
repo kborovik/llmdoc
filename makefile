@@ -13,7 +13,7 @@ VERSION := $(shell awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.tom
 docker_registry := ghcr.io/kborovik
 
 ELASTIC_VERSION := 8.12.0
-ELASTIC_PASSWORD ?= $(shell grep -i ELASTIC_PASSWORD .env | cut -d "=" -f 2)
+ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
 
 ifeq ($(ELASTIC_PASSWORD),)
 ELASTIC_PASSWORD := MyBigPass45
@@ -86,6 +86,7 @@ clean: stop
 	docker volume rm elastic || true
 	docker volume rm kibana || true
 	docker volume rm certs || true
+	docker volume rm ollama || true
 
 start:
 	docker compose up --detach --remove-orphans --wait
@@ -102,7 +103,6 @@ run:
 
 python-init:
 	$(call header,Initialize Python Environment)
-	pip install -U pipx pip
 	pipx install poetry
 	poetry lock
 	poetry install
@@ -116,6 +116,7 @@ python-env-activate:
 	docker volume create elastic
 	docker volume create kibana
 	docker volume create certs
+	docker volume create ollama
 	$(call header,Create Elastic SSL certs)
 	docker container run --name=elastic-init --user=root --tty --interactive --rm --volume=certs:/usr/share/elasticsearch/config/certs \
 	docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_VERSION} \
@@ -178,6 +179,6 @@ ifeq ($(shell command -v docker),)
 $(error ==> Install Docker <==)
 endif
 
-ifeq ($(shell command -v pip),)
-$(error ==> Install Python PIP <==)
+ifeq ($(shell command -v pipx),)
+$(error ==> Install Python PIPX <==)
 endif
