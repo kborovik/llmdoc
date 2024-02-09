@@ -166,9 +166,9 @@ test-index: ollama-model
 	poetry run llmdoc index --file tests/test.txt
 
 test-search: ollama-model
-	$(call header,Prompt WITHOUT search query)
+	$(call header,Test Base LLM. Prompt: "Who is Count Von Kramm?")
 	poetry run llmdoc generate --prompt "Who is Count Von Kramm?"
-	$(call header,Prompt WITH search query)
+	$(call header,Test LLM Search. Search query: "Who is Count Von Kramm?")
 	poetry run llmdoc search --query "Who is Count Von Kramm?"
 
 ###############################################################################

@@ -22,9 +22,15 @@ make test
 
 ## Local Development Environment Setup
 
-[![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz){:target="_blank"}
+[![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz)
 
 ## Functional Tests
+
+[![asciicast](https://asciinema.org/a/mSmFC5gwgh1WfYAqN03M06J3n.svg)](https://asciinema.org/a/mSmFC5gwgh1WfYAqN03M06J3n)
+
+## Search Query Debug
+
+[![asciicast](https://asciinema.org/a/oq3HeHNV9U9gszi7ExpXVgbxR.svg)](https://asciinema.org/a/oq3HeHNV9U9gszi7ExpXVgbxR)
 
 # Prerequisites
 
