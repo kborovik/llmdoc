@@ -22,13 +22,25 @@ make test
 
 ## Local Development Environment Setup
 
+```shell
+make init
+```
+
 [![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz)
 
 ## Functional Tests
 
+```shell
+make test
+```
+
 [![asciicast](https://asciinema.org/a/mSmFC5gwgh1WfYAqN03M06J3n.svg)](https://asciinema.org/a/mSmFC5gwgh1WfYAqN03M06J3n)
 
 ## Search Query Debug
+
+```shell
+llmdoc search --query "Who is Count Von Kramm?" --debug
+```
 
 [![asciicast](https://asciinema.org/a/oq3HeHNV9U9gszi7ExpXVgbxR.svg)](https://asciinema.org/a/oq3HeHNV9U9gszi7ExpXVgbxR)
 
