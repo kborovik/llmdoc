@@ -1,25 +1,26 @@
-# Question Answering with Generative AI and Elasticsearch
+# Document Question Answering with Generative AI and Elasticsearch
 
 This project utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
 
-## Document Analysis and Summarization
-
 The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze text. It performs various tasks such as sentence splitting, generating sentence lemmas, grouping sentences and lemmas into chunks, generating embeddings using a Large Language Model, and storing the generated document in an ElasticSearch index.
 
-### Workflow
+## Document Intake Flow
 
-1. Text analysis with spaCy library
-2. Sentence splitting
-3. Lemmatization of sentences
-4. Chunking of sentences and lemmas
-5. Generation of embeddings using a Large Language Model
-6. Storage of the generated document in an ElasticSearch index
+1. Split text into sentences with spaCy library
+1. Lemmatize sentence with spaCy library
+1. Group sentences into ElasticSearch documents
+1. Generate embedding for KNN search with Large Language Model (LLM)
+1. Store documents in ElasticSearch index
+
+## Document Search Flow
+
+1. 
 
 # Quick Start
 
 - Clone GitHub repository
 - Set ELASTIC_PASSWORD
-- Initialize repository (setup Python and ElasticSearch environment)
+- Initialize local development environment (Docker Compose, ElasticSearch)
 - Start Docker Compose (ElasticSearch, Kibana, Ollama LLM Model)
 - Run end-to-end test
 
@@ -27,7 +28,8 @@ The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze 
 git clone https://github.com/kborovik/llmdoc.git
 cd llmdoc
 echo "ELASTIC_PASSWORD=MyBigPass45" > .env
-make init start test
+make init
+make test
 ```
 
 # Demo

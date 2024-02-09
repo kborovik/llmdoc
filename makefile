@@ -74,9 +74,12 @@ commit: version-patch
 	git add --all
 	git commit --message="version $${version}"
 
-release: commit build
+release: version-minor build
 	$(call header,Create GitHub Release)
-	gh release create ${VERSION} dist/${app_name}-${VERSION}-py3-none-any.whl --title "Release ${VERSION}" --notes "Release ${VERSION}"
+	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
+	git add --all
+	git commit --message="version $${version}"
+	gh release create $${version} dist/${app_name}-$${version}-py3-none-any.whl --title "Release $${version}" --notes "Release $${version}"
 
 clean: stop
 	$(call header,Remove Python files)
@@ -97,6 +100,8 @@ stop:
 	docker compose down --remove-orphans
 
 run:
+	$(call header,Run LLMDoc API)
+	docker container stop llmdoc-1
 	poetry run uvicorn llmdoc.api_v1:app --interface=wsgi --host=0.0.0.0 --no-access-log --reload --reload-dir=llmdoc
 
 python-env-activate:

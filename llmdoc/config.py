@@ -22,6 +22,7 @@ class Config(BaseSettings):
     ollama_host: str = "localhost"
     ollama_port: int = 11434
     ollama_model: str = "mistral:instruct"
+    ollama_system: str = "You are document question answering assistant. Answer USER QUESTION based on SEARCH RESULTS. Include DOCUMENT-ID reference in your answer."
     ollama_options: dict = {
         "temperature": 0.8,  # LLM model temperature
         "num_ctx": 4096,  # LLM context length

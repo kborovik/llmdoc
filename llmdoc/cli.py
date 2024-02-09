@@ -177,17 +177,17 @@ def search(
     context = ""
     for doc in resp:
         logger.opt(ansi=True).debug(
-            "\n<yellow>Document-ID: {}\nScore: {}</yellow>\n{}\n",
+            "\n<yellow>DOCUMENT-ID: {}\nSCORE: {}</yellow>\n{}\n",
             doc.id,
             doc.score,
             doc.text,
         )
-        context += f"\nDocument-ID {doc.id}\n{doc.text}\n\n"
+        context += f"\nDOCUMENT-ID {doc.id}\n{doc.text}\n\n"
 
     logger.trace("Query context: {}", context)
     logger.success("Found {} results", len(resp))
 
-    prompt = f"Answer user question based on search results. Explain answer by referencing Document-ID.\nUser question: {query}.\nSearch results:\n\n{context}\n"
+    prompt = f"USER QUESTION: {query}.\nSEARCH RESULTS:\n\n{context}\n"
 
     llm.stream(prompt=prompt)
 
@@ -201,6 +201,8 @@ def generate(
     Query LLM without search context
     """
     from . import llm
+
+    cfg.ollama_system = None
 
     if stream:
         llm.stream(prompt=prompt)

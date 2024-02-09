@@ -39,6 +39,7 @@ def stream(prompt: str) -> None:
         prompt=prompt,
         stream=True,
         options=cfg.ollama_options,
+        system=cfg.ollama_system,
     )
 
     try:
