@@ -22,7 +22,7 @@ make test
 
 ## Local Development Environment Setup
 
-[![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz)
+[![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz){:target="_blank"}
 
 ## Functional Tests
 
