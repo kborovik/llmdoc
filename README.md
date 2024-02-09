@@ -4,18 +4,6 @@ This project utilizes a Retrieval-Augmented Generation (RAG) approach, leveragin
 
 The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze text. It performs various tasks such as sentence splitting, generating sentence lemmas, grouping sentences and lemmas into chunks, generating embeddings using a Large Language Model, and storing the generated document in an ElasticSearch index.
 
-## Document Intake Flow
-
-1. Split text into sentences with spaCy library
-1. Lemmatize sentence with spaCy library
-1. Group sentences into ElasticSearch documents
-1. Generate embedding for KNN search with Large Language Model (LLM)
-1. Store documents in ElasticSearch index
-
-## Document Search Flow
-
-1. 
-
 # Quick Start
 
 - Clone GitHub repository
@@ -28,12 +16,15 @@ The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze 
 git clone https://github.com/kborovik/llmdoc.git
 cd llmdoc
 echo "ELASTIC_PASSWORD=MyBigPass45" > .env
-make init
+make init status
 make test
 ```
 
-# Demo
+## Local Development Environment Setup
 
+[![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz)
+
+## Functional Tests
 
 # Prerequisites
 
@@ -75,3 +66,17 @@ echo "ELASTIC_PASSWORD=MyBigPass45" >> .env
 ```
 
 The full list of supported configuration settings can be found in the `llmdoc/config.py` file.
+
+# Pipeline
+
+## Document Intake
+
+1. Split text into sentences with spaCy library
+1. Lemmatize sentence with spaCy library
+1. Group sentences into ElasticSearch documents
+1. Generate embedding for KNN search with Large Language Model (LLM)
+1. Store documents in ElasticSearch index
+
+## Document Search
+
+1. 

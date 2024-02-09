@@ -17,6 +17,8 @@ ELASTIC_VERSION := 8.12.0
 ELASTIC_USER ?= elastic
 ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
 
+PAUSE ?= 0
+
 ###############################################################################
 # Files
 ###############################################################################
@@ -94,9 +96,12 @@ start: build
 	docker compose up --detach --remove-orphans --wait
 
 status:
+	$(call header,Status Docker Compose)
 	docker container ps --format "table {{.Names}}\t{{.Image}}\t{{.Status}}"
+	echo
 
 stop:
+	$(call header,Stop Docker Compose)
 	docker compose down --remove-orphans
 
 run:
@@ -174,6 +179,7 @@ echo
 echo "########################################################################"
 echo "# $(1)"
 echo "########################################################################"
+sleep ${PAUSE}
 endef
 
 ###############################################################################
