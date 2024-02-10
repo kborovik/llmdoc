@@ -44,7 +44,7 @@ make test
 llmdoc search --query "Who is Count Von Kramm?" --debug
 ```
 
-[![asciicast](https://asciinema.org/a/637410.svg)](https://asciinema.org/a/637410)
+[![asciicast](https://asciinema.org/a/637419.svg)](https://asciinema.org/a/637419)
 
 ## Document Index Debug
 

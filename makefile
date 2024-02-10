@@ -172,10 +172,10 @@ test-search: ollama-model
 	poetry run llmdoc search --query "Who is Count Von Kramm?"
 
 demo-init:
-	asciinema rec -t "llmdoc make init" -c "make init status"
+	asciinema rec -t "llmdoc make init" -c "PAUSE=3 make init status"
 
 demo-test:
-	asciinema rec -t "llmdoc make test" -c "make test"
+	asciinema rec -t "llmdoc make test" -c "PAUSE=3 make test"
 
 demo-search:
 	asciinema rec -t "llmdoc search debug" -c "poetry run llmdoc search --query 'Who is Count Von Kramm?' --debug --search-size 2"
