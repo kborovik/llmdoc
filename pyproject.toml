@@ -3,7 +3,7 @@ authors = ["Konstantin Borovik <kb@lab5.ca>"]
 description = "Document Analysis and Summarization with Large Language Model (LLM)"
 name = "llmdoc"
 readme = "README.md"
-version = "0.1.31"
+version = "0.1.32"
 
 [tool.poetry.dependencies]
 elasticsearch = "~8.12.0"

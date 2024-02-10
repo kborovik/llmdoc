@@ -28,7 +28,7 @@ make test
 make init status
 ```
 
-[![asciicast](https://asciinema.org/a/637421.svg)](https://asciinema.org/a/637421)
+[![asciicast](https://asciinema.org/a/637422.svg)](https://asciinema.org/a/637422)
 
 ## Functional Tests
 
