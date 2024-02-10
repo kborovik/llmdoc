@@ -24,7 +24,7 @@ def pull(model: str = cfg.ollama_model) -> None:
         except Exception as error:
             logger.error(error)
 
-        logger.success("Pulled LLM model {}", cfg.ollama_model)
+    logger.success("Pulled LLM model {}", cfg.ollama_model)
 
 
 def stream(prompt: str) -> None:
@@ -89,7 +89,7 @@ def embeddings(prompt: str) -> List[float]:
     if not prompt:
         raise ValueError("Text cannot be empty or null.")
 
-    logger.debug("Embeddings text: {}", repr(prompt))
+    logger.trace("Embeddings text: {}", repr(prompt))
 
     try:
         resp = ollama.embeddings(model=cfg.ollama_model, prompt=prompt)

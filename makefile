@@ -171,6 +171,18 @@ test-search: ollama-model
 	$(call header,Test LLM Search. Search query: "Who is Count Von Kramm?")
 	poetry run llmdoc search --query "Who is Count Von Kramm?"
 
+demo-init:
+	asciinema rec -t "llmdoc make init" -c "make init status"
+
+demo-test:
+	asciinema rec -t "llmdoc make test" -c "make test"
+
+demo-search:
+	asciinema rec -t "llmdoc search debug" -c "poetry run llmdoc search --query 'Who is Count Von Kramm?' --debug --search-size 2"
+
+demo-index:
+	asciinema rec -t "llmdoc index debug" -c "poetry run  llmdoc index --file tests/test.txt --debug"
+
 ###############################################################################
 # Functions
 ###############################################################################

@@ -14,7 +14,7 @@ class Config(BaseSettings):
     elastic_index_name: str = "llmdoc"
     elastic_password: SecretStr = None
     elastic_user: str = "elastic"
-    elastic_search_size: int = 5
+    elastic_search_size: int = 3
     elastic_search_score: float = 3.0
     elastic_bm25_boost: float = 1.0
     elastic_knn_boost: float = 1.2

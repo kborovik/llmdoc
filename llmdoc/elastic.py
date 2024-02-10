@@ -66,6 +66,12 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
         )
         logger.success("Indexed {}", f"{doc_id}-{i}")
 
+        logger.opt(ansi=True).debug(
+            "\n<yellow>Text:</yellow>\n{}\n<yellow>Lemma:</yellow>\n{}\n",
+            repr(chunk.text),
+            repr(chunk.lemma),
+        )
+
 
 def search(query: str) -> list[ElasticHits]:
     """

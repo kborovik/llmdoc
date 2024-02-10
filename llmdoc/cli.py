@@ -102,16 +102,6 @@ def index(
         doc=nlp_doc,
         chunk_size=cfg.chunk_words,
     )
-    logger.debug(
-        "First Chunk\n==> Text <==\n{}\n==> Lemma <==\n{}\n",
-        repr(chunks[0].text),
-        repr(chunks[0].lemma),
-    )
-    logger.debug(
-        "Last Chunk\n==> Text <==\n{}\n==> Lemma <==\n{}\n",
-        repr(chunks[-1].text),
-        repr(chunks[-1].lemma),
-    )
     logger.success("Splitted into {} sentence groups", len(chunks))
 
     logger.info("Indexing file {}", doc_id)

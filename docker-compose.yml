@@ -25,6 +25,8 @@ services:
       interval: 10s
       timeout: 2s
       retries: 6
+      start_interval: 1s
+      start_period: 30s
     volumes:
       - type: volume
         source: elastic
@@ -77,7 +79,9 @@ services:
       test: curl http://127.0.0.1:5601/api/status
       interval: 10s
       timeout: 2s
-      retries: 6
+      retries: 3
+      start_interval: 1s
+      start_period: 30s
     volumes:
       - type: volume
         source: kibana
@@ -124,7 +128,9 @@ services:
       test: curl http://127.0.0.1:8000/health
       interval: 10s
       timeout: 2s
-      retries: 6
+      retries: 2
+      start_interval: 1s
+      start_period: 30s
     volumes:
       - type: volume
         source: certs

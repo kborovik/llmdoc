@@ -1,6 +1,8 @@
 # Document Question Answering with Generative AI and Elasticsearch
 
-This project utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
+This project demonstrates a DevOps workflow for automating and functionally testing local development that integrates seamlessly with cloud DevOps workflows. It focuses on functional and integration testing with ElasticSearch and Ollama rather than unit testing. For details on the Terraform and Kubernetes deployment workflow, see the related project here: https://github.com/kborovik/llmdoc-infra
+
+`llmdoc` Python application utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
 
 The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze text. It performs various tasks such as sentence splitting, generating sentence lemmas, grouping sentences and lemmas into chunks, generating embeddings using a Large Language Model, and storing the generated document in an ElasticSearch index.
 
@@ -23,10 +25,10 @@ make test
 ## Local Development Environment Setup
 
 ```shell
-make init
+make init status
 ```
 
-[![asciicast](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz.svg)](https://asciinema.org/a/lChuabZWkqe1tHHeerOwtNnVz)
+<a href="https://asciinema.org/a/637410" target="_blank"><img src="https://asciinema.org/a/637410.svg" /></a>
 
 ## Functional Tests
 
@@ -34,7 +36,7 @@ make init
 make test
 ```
 
-[![asciicast](https://asciinema.org/a/mSmFC5gwgh1WfYAqN03M06J3n.svg)](https://asciinema.org/a/mSmFC5gwgh1WfYAqN03M06J3n)
+<a href="https://asciinema.org/a/637413" target="_blank"><img src="https://asciinema.org/a/637413.svg" /></a>
 
 ## Search Query Debug
 
@@ -42,7 +44,16 @@ make test
 llmdoc search --query "Who is Count Von Kramm?" --debug
 ```
 
-[![asciicast](https://asciinema.org/a/oq3HeHNV9U9gszi7ExpXVgbxR.svg)](https://asciinema.org/a/oq3HeHNV9U9gszi7ExpXVgbxR)
+<a href="https://asciinema.org/a/637414" target="_blank"><img src="https://asciinema.org/a/637414.svg" /></a>
+
+## Document Index Debug
+
+```shell
+llmdoc index --file tests/test.txt --debug
+```
+
+<a href="https://asciinema.org/a/637416" target="_blank"><img src="https://asciinema.org/a/637416.svg" /></a>
+
 
 # Prerequisites
 
@@ -97,4 +108,7 @@ The full list of supported configuration settings can be found in the `llmdoc/co
 
 ## Document Search
 
-1. 
+1. Generate embeddings for KNN search with LLM
+2. Send combined BM25+KNN query to ElasticSearch
+3. Construct LLM prompt with ElasticSearch query results
+4. Steam (or JSON) LLM prediction

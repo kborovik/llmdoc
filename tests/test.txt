@@ -1,31 +1,6 @@
-﻿
-The Adventures of Sherlock Holmes
+﻿The Adventures of Sherlock Holmes by Arthur Conan Doyle
 
-by Arthur Conan Doyle
-
-
-Contents
-
-   I.     A Scandal in Bohemia
-   II.    The Red-Headed League
-   III.   A Case of Identity
-   IV.    The Boscombe Valley Mystery
-   V.     The Five Orange Pips
-   VI.    The Man with the Twisted Lip
-   VII.   The Adventure of the Blue Carbuncle
-   VIII.  The Adventure of the Speckled Band
-   IX.    The Adventure of the Engineer’s Thumb
-   X.     The Adventure of the Noble Bachelor
-   XI.    The Adventure of the Beryl Coronet
-   XII.   The Adventure of the Copper Beeches
-
-
-
-
-I. A SCANDAL IN BOHEMIA
-
-
-I.
+Title: A Scandal in Bohemia
 
 To Sherlock Holmes she is always _the_ woman. I have seldom heard him
 mention her under any other name. In his eyes she eclipses and
@@ -487,9 +462,6 @@ wheels of the royal brougham rolled down the street. “If you will be
 good enough to call to-morrow afternoon at three o’clock I should like
 to chat this little matter over with you.”
 
-
-II.
-
 At three o’clock precisely I was at Baker Street, but Holmes had not
 yet returned. The landlady informed me that he had left the house
 shortly after eight o’clock in the morning. I sat down beside the fire,
@@ -939,9 +911,6 @@ appeared to come from a slim youth in an ulster who had hurried by.
 
 “I’ve heard that voice before,” said Holmes, staring down the dimly lit
 street. “Now, I wonder who the deuce that could have been.”
-
-
-III.
 
 I slept at Baker Street that night, and we were engaged upon our toast
 and coffee in the morning when the King of Bohemia rushed into the
