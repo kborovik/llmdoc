@@ -28,7 +28,7 @@ make test
 make init status
 ```
 
-<a href="https://asciinema.org/a/637410" target="_blank"><img src="https://asciinema.org/a/637410.svg" /></a>
+[![asciicast](https://asciinema.org/a/637410.svg)](https://asciinema.org/a/637410)
 
 ## Functional Tests
 
@@ -36,7 +36,7 @@ make init status
 make test
 ```
 
-<a href="https://asciinema.org/a/637413" target="_blank"><img src="https://asciinema.org/a/637413.svg" /></a>
+[![asciicast](https://asciinema.org/a/637418.svg)](https://asciinema.org/a/637418)
 
 ## Search Query Debug
 
@@ -44,7 +44,7 @@ make test
 llmdoc search --query "Who is Count Von Kramm?" --debug
 ```
 
-<a href="https://asciinema.org/a/637414" target="_blank"><img src="https://asciinema.org/a/637414.svg" /></a>
+[![asciicast](https://asciinema.org/a/637410.svg)](https://asciinema.org/a/637410)
 
 ## Document Index Debug
 
@@ -52,7 +52,7 @@ llmdoc search --query "Who is Count Von Kramm?" --debug
 llmdoc index --file tests/test.txt --debug
 ```
 
-<a href="https://asciinema.org/a/637416" target="_blank"><img src="https://asciinema.org/a/637416.svg" /></a>
+[![asciicast](https://asciinema.org/a/637420.svg)](https://asciinema.org/a/637420)
 
 
 # Prerequisites

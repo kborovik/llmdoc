@@ -22,7 +22,7 @@ def analyze(text: str) -> NlpDoc:
 
     logger.info("Start NLP analysis")
 
-    text = re.sub(r"[\n\t]+", " ", text)
+    text = re.sub(r"[\n\t\s]+", " ", text)
     nlp_doc = nlp(text)
 
     logger.success("Finished NLP analysis. Identified {} words", len(nlp_doc))
