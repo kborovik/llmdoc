@@ -172,12 +172,12 @@ def search(
             doc.score,
             doc.text,
         )
-        context += f"\nDOCUMENT-ID {doc.id}\n{doc.text}\n\n"
+        context += doc.text
 
     logger.trace("Query context: {}", context)
     logger.success("Found {} results", len(resp))
 
-    prompt = f"USER QUESTION: {query}.\nSEARCH RESULTS:\n\n{context}\n"
+    prompt = f"USER-QUESTION: {query}.\nSEARCH-RESULTS:\n\n{context}\n"
 
     llm.stream(prompt=prompt)
 

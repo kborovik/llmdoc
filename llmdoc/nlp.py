@@ -23,7 +23,11 @@ def analyze(text: str) -> NlpDoc:
     logger.info("Start NLP analysis")
 
     text = re.sub(r"[\n\t\s]+", " ", text)
-    nlp_doc = nlp(text)
+
+    try:
+        nlp_doc = nlp(text)
+    except Exception as error:
+        logger.error(error)
 
     logger.success("Finished NLP analysis. Identified {} words", len(nlp_doc))
 

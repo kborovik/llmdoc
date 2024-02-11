@@ -19,6 +19,8 @@ ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
 
 PAUSE ?= 0
 
+test_query ?= "Who is Count Von Kramm?"
+
 ###############################################################################
 # Files
 ###############################################################################
@@ -26,7 +28,7 @@ ca_crt := certs/ca.crt
 
 ${ca_crt}:
 	mkdir -p certs
-	docker cp elastic-1:/usr/share/elasticsearch/config/certs/ca.crt certs/ca.crt
+	docker cp elastic-1:/usr/share/elasticsearch/config/certs/ca.crt $@
 
 ###############################################################################
 # Targets
@@ -37,6 +39,7 @@ settings:
 	echo "# ELASTIC_USER=${ELASTIC_USER}"
 	echo "# ELASTIC_PASSWORD=${ELASTIC_PASSWORD}"
 	echo "# docker_image=${docker_registry}/${app_name}:${VERSION}"
+	echo "# test_query='${test_query}'"
 	echo "#######################################################################"
 
 init: .elastic-init .env start ${ca_crt}
@@ -56,6 +59,11 @@ build-docker:
 	--build-arg="VERSION=${VERSION}" \
 	--file=Dockerfile dist/
 
+push-docker:
+	$(call header,Push Docker Image)
+	docker push ${docker_image}:${VERSION}
+	docker push ${docker_image}:latest
+
 install: build
 	$(call header,Install PIPX ${app_name})
 	pipx install --force dist/${app_name}-${VERSION}-py3-none-any.whl
@@ -65,23 +73,20 @@ update:
 	poetry lock
 	poetry install
 
-version-patch:
+version:
 	poetry version patch
 
-version-minor:
-	poetry version minor
-
-commit: version-patch
+commit: version
 	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	git add --all
 	git commit --message="version $${version}"
 
-release: version-minor build
+release: commit build
 	$(call header,Create GitHub Release)
 	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	git add --all
 	git commit --message="version $${version}"
-	gh release create $${version} dist/${app_name}-$${version}-py3-none-any.whl --title "Release $${version}" --notes "Release $${version}"
+	gh release create $${version} dist/${app_name}-$${version}-py3-none-any.whl --title "Release $${version}" --notes "Docker Image: ${docker_image}:$${version}"
 
 clean: stop
 	$(call header,Remove Python files)
@@ -153,7 +158,10 @@ shell-ollama:
 shell-elastic:
 	docker container exec --tty --interactive elastic-1 /bin/bash
 
-test: start test-index test-search
+shell-llmdoc:
+	docker container exec --tty --interactive llmdoc-1 /bin/bash
+
+test: start test-index test-search test-app
 
 ollama-model:
 	$(call header,Pull Ollama Model)
@@ -166,10 +174,14 @@ test-index: ollama-model
 	poetry run llmdoc index --file tests/test.txt
 
 test-search: ollama-model
-	$(call header,Test Base LLM. Prompt: "Who is Count Von Kramm?")
-	poetry run llmdoc generate --prompt "Who is Count Von Kramm?"
-	$(call header,Test LLM Search. Search query: "Who is Count Von Kramm?")
-	poetry run llmdoc search --query "Who is Count Von Kramm?"
+	$(call header,Test Base LLM: ${test_query})
+	poetry run llmdoc generate --prompt ${test_query}
+	$(call header,Test CLI Search: ${test_query})
+	poetry run llmdoc search --query ${test_query}
+
+test-app:
+	$(call header,Test API Search: ${test_query})
+	http POST http://localhost:8000/search query=${test_query}
 
 demo-init:
 	asciinema rec -t "llmdoc make init" -c "PAUSE=3 make init status"

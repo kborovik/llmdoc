@@ -38,8 +38,7 @@ def init() -> None:
         if error.error == "resource_already_exists_exception":
             pass
         else:
-            logger.error(error.body)
-            raise
+            logger.error(error)
 
 
 def index(chunks: List[TextChunk], doc_id: str) -> None:
@@ -59,11 +58,16 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
             lemma=chunk.lemma,
             embed=llm.embeddings(prompt=chunk.lemma),
         )
-        es.index(
-            id=f"{doc_id}-{i}",
-            index=cfg.elastic_index_name,
-            document=elastic_doc.model_dump(),
-        )
+
+        try:
+            es.index(
+                id=f"{doc_id}-{i}",
+                index=cfg.elastic_index_name,
+                document=elastic_doc.model_dump(),
+            )
+        except Exception as error:
+            logger.error(error)
+
         logger.success("Indexed {}", f"{doc_id}-{i}")
 
         logger.opt(ansi=True).debug(
@@ -78,6 +82,11 @@ def search(query: str) -> list[ElasticHits]:
     Elastic BM25 + KNN search
     """
 
+    try:
+        embeddings = llm.embeddings(prompt=query)
+    except Exception as error:
+        logger.error(error)
+
     bm25 = {
         "match": {
             "text": {
@@ -89,19 +98,23 @@ def search(query: str) -> list[ElasticHits]:
 
     knn = {
         "field": "embed",
-        "query_vector": llm.embeddings(prompt=query),
+        "query_vector": embeddings,
         "k": cfg.elastic_search_size * 2,
         "num_candidates": 10000,
         "boost": cfg.elastic_knn_boost,
     }
 
-    reply = es.search(
-        index=cfg.elastic_index_name,
-        fields=["text"],
-        size=cfg.elastic_search_size,
-        query=bm25,
-        knn=knn,
-    )
+    try:
+        reply = es.search(
+            index=cfg.elastic_index_name,
+            fields=["text"],
+            size=cfg.elastic_search_size,
+            query=bm25,
+            knn=knn,
+        )
+    except Exception as error:
+        logger.error(error)
+        raise
 
     hits = reply["hits"]["hits"]
     docs = []

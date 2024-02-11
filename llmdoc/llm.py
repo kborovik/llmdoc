@@ -89,11 +89,16 @@ def embeddings(prompt: str) -> List[float]:
     if not prompt:
         raise ValueError("Text cannot be empty or null.")
 
-    logger.trace("Embeddings text: {}", repr(prompt))
+    import requests
+
+    client = requests.Session()
 
     try:
-        resp = ollama.embeddings(model=cfg.ollama_model, prompt=prompt)
+        resp = client.post(
+            url=f"{url}/api/embeddings",
+            json={"prompt": prompt, "model": cfg.ollama_model},
+        )
     except Exception as error:
-        logger.error("Host {}, {}", url, error)
+        logger.exception(error)
 
-    return resp["embedding"]
+    return resp.json()["embedding"]

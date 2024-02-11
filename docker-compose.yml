@@ -21,7 +21,7 @@ services:
       - ELASTIC_PASSWORD=${ELASTIC_PASSWORD:?err}
       - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
     healthcheck:
-      test: curl --user elastic:${ELASTIC_PASSWORD} --cacert /usr/share/elasticsearch/config/certs/ca.crt https://127.0.0.1:9200/_cat/health
+      test: curl -f --user elastic:${ELASTIC_PASSWORD} --cacert /usr/share/elasticsearch/config/certs/ca.crt https://127.0.0.1:9200/_cat/health
       interval: 10s
       timeout: 2s
       retries: 6
@@ -76,7 +76,7 @@ services:
       elastic:
         condition: service_healthy
     healthcheck:
-      test: curl http://127.0.0.1:5601/api/status
+      test: curl -f http://127.0.0.1:5601/api/status
       interval: 10s
       timeout: 2s
       retries: 3
@@ -115,8 +115,10 @@ services:
     container_name: llmdoc-1
     hostname: llmdoc-1
     environment:
+      - elastic_host=elastic-1
       - elastic_ca_certs=/certs/ca.crt
       - elastic_password=${ELASTIC_PASSWORD:?err}
+      - ollama_host=ollama-1
     ports:
       - 8000:8000
     depends_on:
@@ -125,12 +127,12 @@ services:
       elastic:
         condition: service_healthy
     healthcheck:
-      test: curl http://127.0.0.1:8000/health
+      test: curl -f http://127.0.0.1:8000/health
       interval: 10s
       timeout: 2s
       retries: 2
       start_interval: 1s
-      start_period: 30s
+      start_period: 10s
     volumes:
       - type: volume
         source: certs

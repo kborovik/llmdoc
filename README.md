@@ -36,7 +36,7 @@ make init status
 make test
 ```
 
-[![asciicast](https://asciinema.org/a/637418.svg)](https://asciinema.org/a/637418)
+[![asciicast](https://asciinema.org/a/637610.svg)](https://asciinema.org/a/637610)
 
 ## Search Query Debug
 
