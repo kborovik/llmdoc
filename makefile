@@ -81,7 +81,7 @@ commit: version
 	git add --all
 	git commit --message="version $${version}"
 
-release: commit build
+release: build
 	$(call header,Create GitHub Release)
 	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	git add --all
