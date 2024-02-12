@@ -86,7 +86,7 @@ commit: version
 	git add --all
 	git commit --message="version $${version}"
 
-release: commit build docker-push
+release: version build commit docker-push
 	$(call header,Create GitHub Release)
 	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
 	gh release create $${version} dist/${app_name}-$${version}-py3-none-any.whl --title "Release $${version}" --notes "Docker Image: ${docker_image}:$${version}"

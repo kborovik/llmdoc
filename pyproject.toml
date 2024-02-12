@@ -3,7 +3,7 @@ authors = ["Konstantin Borovik <kb@lab5.ca>"]
 description = "Document Analysis and Summarization with Large Language Model (LLM)"
 name = "llmdoc"
 readme = "README.md"
-version = "0.1.39"
+version = "0.1.37"
 
 [tool.poetry.dependencies]
 elasticsearch = "~8.12.0"
@@ -13,8 +13,8 @@ loguru = "^0.7.2"
 ollama = "^0.1.4"
 pydantic-settings = "~2.1.0"
 python = "~3.11"
-uvicorn = "^0.27.0.post1"
 requests = "^2.31.0"
+uvicorn = "^0.27.0.post1"
 
 [tool.poetry.scripts]
 llmdoc = "llmdoc.cli:cli"
