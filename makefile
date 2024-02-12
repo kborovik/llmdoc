@@ -19,7 +19,7 @@ ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
 
 PAUSE ?= 0
 
-test_query ?= "Who is Count Von Kramm?"
+test_query ?= 'Who is Count Von Kramm?'
 
 ###############################################################################
 # Files
@@ -44,22 +44,27 @@ settings:
 
 init: .elastic-init .env start ${ca_crt}
 
-build: build-poetry build-docker
+build: poetry-build docker-build
 
-build-poetry:
+poetry-build:
 	$(call header,Build Python Wheel)
 	poetry build --format=wheel
-
-build-docker:
-	$(call header,Build Docker Image)
 	poetry export --format requirements.txt --output dist/requirements.txt --without-hashes
+
+docker-build:
+	$(call header,Build Docker Image)
 	docker buildx build \
 	--tag="${docker_image}:${VERSION}" \
 	--tag="${docker_image}:latest" \
 	--build-arg="VERSION=${VERSION}" \
 	--file=Dockerfile dist/
 
-push-docker:
+docker-auth:
+	$(call header,Docker Auth)
+	GITHUB_TOKEN=$$(pass github/token/kborovik)
+	echo $${GITHUB_TOKEN} | docker login ghcr.io -u kborovik --password-stdin
+
+docker-push: docker-auth
 	$(call header,Push Docker Image)
 	docker push ${docker_image}:${VERSION}
 	docker push ${docker_image}:latest
@@ -81,11 +86,9 @@ commit: version
 	git add --all
 	git commit --message="version $${version}"
 
-release: build
+release: build commit docker-push
 	$(call header,Create GitHub Release)
 	version=$$(awk -F'[ ="]+' '$$1 == "version" { print $$2 }' pyproject.toml)
-	git add --all
-	git commit --message="version $${version}"
 	gh release create $${version} dist/${app_name}-$${version}-py3-none-any.whl --title "Release $${version}" --notes "Docker Image: ${docker_image}:$${version}"
 
 clean: stop
@@ -190,7 +193,7 @@ demo-test:
 	asciinema rec -t "llmdoc make test" -c "PAUSE=3 make test"
 
 demo-search:
-	asciinema rec -t "llmdoc search debug" -c "poetry run llmdoc search --query 'Who is Count Von Kramm?' --debug --search-size 2"
+	asciinema rec -t "llmdoc search debug" -c "poetry run llmdoc search --query ${test_query} --debug --search-size 2"
 
 demo-index:
 	asciinema rec -t "llmdoc index debug" -c "poetry run  llmdoc index --file tests/test.txt --debug"
