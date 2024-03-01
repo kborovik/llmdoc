@@ -100,5 +100,6 @@ def embeddings(prompt: str) -> List[float]:
         )
     except Exception as error:
         logger.exception(error)
+        raise ValueError("Failed to generate embeddings") from error
 
     return resp.json()["embedding"]

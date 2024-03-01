@@ -92,7 +92,7 @@ services:
         read_only: true
 
   ollama:
-    image: ollama/ollama:0.1.23
+    image: ollama/ollama:${OLLAMA_VERSION:?err}
     container_name: ollama-1
     hostname: ollama-1
     ports:

@@ -67,6 +67,7 @@ def index(chunks: List[TextChunk], doc_id: str) -> None:
             )
         except Exception as error:
             logger.error(error)
+            raise ValueError("Elastic Index failed") from error
 
         logger.success("Indexed {}", f"{doc_id}-{i}")
 

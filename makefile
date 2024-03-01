@@ -17,6 +17,8 @@ ELASTIC_VERSION := 8.12.0
 ELASTIC_USER ?= elastic
 ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
 
+OLLAMA_VERSION := 0.1.26
+
 PAUSE ?= 0
 
 test_query ?= 'Who is Count Von Kramm?'
@@ -188,6 +190,9 @@ test-app:
 	$(call header,Test API Search: ${test_query})
 	http POST http://localhost:8000/search query=${test_query}
 
+###############################################################################
+# Demo
+###############################################################################
 demo-init:
 	asciinema rec -t "llmdoc make init" -c "PAUSE=3 make init status"
 
