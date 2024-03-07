@@ -1,18 +1,39 @@
 # Document Question Answering with Generative AI and Elasticsearch
 
-This project demonstrates a DevOps workflow for automating and functionally testing local development that integrates seamlessly with cloud DevOps workflows. It focuses on functional and integration testing with ElasticSearch and Ollama rather than unit testing. For details on the Terraform and Kubernetes deployment workflow, see the related project here: https://github.com/kborovik/llmdoc-infra
+**Project Overview**
 
-`llmdoc` Python application utilizes a Retrieval-Augmented Generation (RAG) approach, leveraging a Large Language Model (LLM), to condense search results obtained from ElasticSearch document queries into summaries.
+This project provides a hands-on demonstration of a DevOps workflow designed to automate and test local development environments with seamless integration into cloud-based DevOps processes.  The focus lies on functional and integration testing specifically involving Elasticsearch and Ollama, rather than isolated unit testing. 
 
-The `llmdoc` project utilizes the [spaCy](https://spacy.io/) library to analyze text. It performs various tasks such as sentence splitting, generating sentence lemmas, grouping sentences and lemmas into chunks, generating embeddings using a Large Language Model, and storing the generated document in an ElasticSearch index.
+For the associated Terraform and Kubernetes deployment workflow, please refer to the companion project: [https://github.com/kborovik/llmdoc-infra](https://github.com/kborovik/llmdoc-infra)
 
-# Quick Start
+**Core Technology**
 
-- Clone GitHub repository
-- Set ELASTIC_PASSWORD
-- Initialize local development environment (Docker Compose, ElasticSearch)
-- Start Docker Compose (ElasticSearch, Kibana, Ollama LLM Model)
-- Run end-to-end test
+The `llmdoc` Python application employs a Retrieval-Augmented Generation (RAG) approach. It leverages a Large Language Model (LLM) to summarize search results retrieved from Elasticsearch document queries.
+
+**Key Dependencies**
+
+* spaCy: [https://spacy.io/](https://spacy.io/) library for text analysis tasks.
+* Elasticsearch for document indexing and search.
+* Ollama (or similar) Large Language Model
+
+**Workflow Summary**
+
+1. **Text Analysis:** `llmdoc` uses spaCy to:
+   * Break text into sentences.
+   * Generate lemmas (base word forms).
+   * Group related sentences and lemmas.
+2. **Embedding Generation:** An LLM creates text embeddings (numerical representations).
+3. **Elasticsearch Indexing:** Embeddings and associated text are stored in Elasticsearch.
+
+**Quick Start Guide**
+
+1. **Clone Repository:** Get the code from GitHub.
+2. **Environment Setup:**
+   * Set the `ELASTIC_PASSWORD` environment variable.
+   * Initialize your local environment using Docker Compose (Elasticsearch included).
+3. **Launch Containers:** Start Docker Compose (this runs Elasticsearch, Kibana, and the Ollama LLM).
+4. **Run Tests:** Execute the end-to-end test suite.
+
 
 ```shell
 git clone https://github.com/kborovik/llmdoc.git
@@ -30,7 +51,25 @@ make init status
 
 [![asciicast](https://asciinema.org/a/637422.svg)](https://asciinema.org/a/637422)
 
-## Functional Tests
+## Functional Tests Pipeline
+
+**Purpose:** This pipeline verifies the core functionality of the ``llmdoc``. 
+
+**Tested Components and Functionality**
+
+* **Build Processes**
+    * Successful creation of a Python Wheel package.
+    * Successful building of the Docker container image.
+* **Docker Deployment**
+    * Correct configuration of Docker Compose for deployment.
+* **Search and Indexing**
+    * Indexing of data into ElasticSearch using the `llmdoc` component.
+    * Execution of valid ElasticSearch queries using `llmdoc`.
+* **LLM (Large Language Model) Integration**
+    * LLM's ability to comprehend a topic without external search results. 
+    * LLM's capability to accurately interpret provided search results. 
+* **API Interactions**
+    * Correct functionality of the `llmdoc` REST API endpoints.
 
 ```shell
 make test
