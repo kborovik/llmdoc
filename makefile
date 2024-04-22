@@ -17,7 +17,7 @@ ELASTIC_VERSION := 8.12.0
 ELASTIC_USER ?= elastic
 ELASTIC_PASSWORD ?= $(shell grep -is ELASTIC_PASSWORD .env | cut -d "=" -f 2)
 
-OLLAMA_VERSION := 0.1.26
+OLLAMA_VERSION := 0.1.32
 
 PAUSE ?= 0
 

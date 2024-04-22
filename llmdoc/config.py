@@ -18,19 +18,19 @@ class Config(BaseSettings):
     elastic_index_name: str = "llmdoc"
     elastic_password: SecretStr = None
     elastic_user: str = "elastic"
-    elastic_search_size: int = 3
+    elastic_search_size: int = 5
     elastic_search_score: float = 3.0
     elastic_bm25_boost: float = 1.0
     elastic_knn_boost: float = 1.2
 
     ollama_host: str = "localhost"
     ollama_port: int = 11434
-    ollama_model: str = "mistral:instruct"
+    ollama_model: str = "llama3:instruct"
     ollama_system: str = "You are document question answering assistant. Answer USER-QUESTION based on SEARCH-RESULTS."
     ollama_options: dict = {
-        "temperature": 0.8,  # LLM model temperature
-        "num_ctx": 4096,  # LLM context length
-        "num_predict": 512,  # LLM output length
+        "temperature": 0.2,  # LLM model temperature
+        "num_ctx": 8192,  # LLM context length
+        "num_predict": 1024,  # LLM output length
     }
 
     model_config = SettingsConfigDict(
